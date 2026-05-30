@@ -13,8 +13,8 @@ import '../renderer/cover_renderer.dart';
 
 class CoverGeneratorController extends ChangeNotifier {
   // ─── Input state ───
-  String title = '';
-  String subtitle = '';
+  String title = 'My App';
+  String subtitle = 'The best app ever';
   String footerText = '';
 
   Color startColor = const Color(0xFF667eea);

@@ -30,8 +30,10 @@ class CoverRenderer {
     final gap = h * 0.02;
 
     // Pre-measure title and subtitle to calculate actual height
-    final titleFontSize = w * 0.065;
-    final subtitleFontSize = w * 0.03;
+    // Use min of width and height based scaling to handle different aspect ratios
+    final baseSize = math.min(w, h);
+    final titleFontSize = baseSize * 0.065;
+    final subtitleFontSize = baseSize * 0.03;
     final titleContentWidth = w - sideMargin * 2;
 
     final titleParagraph = _buildParagraph(
@@ -57,7 +59,8 @@ class CoverRenderer {
 
     final titleHeight = titleParagraph.height;
     final subtitleHeight = config.subtitle.isNotEmpty ? subtitleParagraph.height : 0;
-    final titleAreaHeight = titleHeight + subtitleHeight + h * 0.01; // small gap between title and subtitle
+    final titleSpacing = config.subtitle.isNotEmpty ? h * 0.01 : 0.0;
+    final titleAreaHeight = titleHeight + subtitleHeight + titleSpacing;
 
     // Calculate footer height based on actual text length
     final footerFontSize = w * 0.025;
@@ -89,24 +92,28 @@ class CoverRenderer {
           footerParagraph.height + h * 0.04; // text height + padding
     }
 
+    // Screenshot area takes remaining height after title and footer
+    final screenshotTop = topMargin + titleAreaHeight + gap;
+    final screenshotHeight = h - screenshotTop - bottomAreaHeight - gap;
     final screenshotArea = Rect.fromLTWH(
       sideMargin,
-      topMargin + titleAreaHeight + gap,
+      screenshotTop,
       w - sideMargin * 2,
-      h - topMargin - titleAreaHeight - bottomAreaHeight - gap,
+      screenshotHeight,
     );
 
-    // Title — centered with letter spacing
+    // Title — always displayed
     canvas.drawParagraph(
       titleParagraph,
       Offset(sideMargin, topMargin),
     );
 
-    // Subtitle — centered, with spacing from title
+    // Subtitle — always displayed if exists.
     if (config.subtitle.isNotEmpty) {
+      final subtitleTop = topMargin + titleHeight + titleSpacing;
       canvas.drawParagraph(
         subtitleParagraph,
-        Offset(sideMargin, topMargin + titleHeight + h * 0.01),
+        Offset(sideMargin, subtitleTop),
       );
     }
 
@@ -223,13 +230,13 @@ class CoverRenderer {
     canvas.save();
     canvas.clipRRect(rrect);
 
-    // Scale to fill width, top-align. Bottom overflows and gets clipped.
+    // `topCenter` cover: fill area, center horizontally, anchor at top.
     final imgW = image.width.toDouble();
     final imgH = image.height.toDouble();
-    final scale = area.width / imgW;
-    final drawW = area.width;
+    final scale = math.max(area.width / imgW, area.height / imgH);
+    final drawW = imgW * scale;
     final drawH = imgH * scale;
-    final dx = area.left;
+    final dx = area.left + (area.width - drawW) / 2;
     final dy = area.top;
 
     canvas.drawImageRect(

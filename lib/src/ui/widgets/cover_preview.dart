@@ -30,7 +30,14 @@ class CoverPreview extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: imageBytes != null
-            ? Image.memory(imageBytes!, fit: BoxFit.cover)
+            ? Align(
+                alignment: Alignment.topCenter,
+                child: Image.memory(
+                  imageBytes!,
+                  fit: BoxFit.contain,
+                  alignment: Alignment.topCenter,
+                ),
+              )
             : _buildPlaceholder(),
       ),
     );

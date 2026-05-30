@@ -34,6 +34,8 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
     _footerCtrl = TextEditingController(text: c.footerText)
       ..addListener(() => c.footerText = _footerCtrl.text);
     c.addListener(_onControllerUpdate);
+    // Auto-generate preview on page load
+    WidgetsBinding.instance.addPostFrameCallback((_) => c.generate());
   }
 
   @override
