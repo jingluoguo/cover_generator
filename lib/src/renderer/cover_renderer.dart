@@ -27,8 +27,37 @@ class CoverRenderer {
     // Layout regions
     final topMargin = h * 0.04;
     final sideMargin = w * 0.07;
-    final titleAreaHeight = h * 0.12;
     final gap = h * 0.02;
+
+    // Pre-measure title and subtitle to calculate actual height
+    final titleFontSize = w * 0.065;
+    final subtitleFontSize = w * 0.03;
+    final titleContentWidth = w - sideMargin * 2;
+
+    final titleParagraph = _buildParagraph(
+      text: config.title,
+      width: titleContentWidth,
+      fontSize: titleFontSize,
+      fontWeight: FontWeight.w900,
+      maxLines: 2,
+      lineHeight: 1.15,
+      textAlign: ui.TextAlign.center,
+    );
+
+    final subtitleParagraph = _buildParagraph(
+      text: config.subtitle,
+      width: titleContentWidth,
+      fontSize: subtitleFontSize,
+      fontWeight: FontWeight.w400,
+      maxLines: 2,
+      lineHeight: 1.4,
+      textAlign: ui.TextAlign.center,
+      color: Colors.white.withValues(alpha: 0.85),
+    );
+
+    final titleHeight = titleParagraph.height;
+    final subtitleHeight = config.subtitle.isNotEmpty ? subtitleParagraph.height : 0;
+    final titleAreaHeight = titleHeight + subtitleHeight + h * 0.01; // small gap between title and subtitle
 
     // Calculate footer height based on actual text length
     final footerFontSize = w * 0.025;
@@ -68,42 +97,18 @@ class CoverRenderer {
     );
 
     // Title — centered with letter spacing
-    final titleFontSize = w * 0.065;
-    _drawText(
-      canvas,
-      text: config.title,
-      rect: Rect.fromLTWH(
-        sideMargin,
-        topMargin,
-        w - sideMargin * 2,
-        titleAreaHeight * 0.55,
-      ),
-      fontSize: titleFontSize,
-      fontWeight: FontWeight.w900,
-      color: Colors.white,
-      maxLines: 2,
-      lineHeight: 1.15,
-      textAlign: TextAlign.center,
+    canvas.drawParagraph(
+      titleParagraph,
+      Offset(sideMargin, topMargin),
     );
 
     // Subtitle — centered, with spacing from title
-    final subtitleFontSize = w * 0.03;
-    _drawText(
-      canvas,
-      text: config.subtitle,
-      rect: Rect.fromLTWH(
-        sideMargin,
-        topMargin + titleAreaHeight * 0.6,
-        w - sideMargin * 2,
-        titleAreaHeight * 0.4,
-      ),
-      fontSize: subtitleFontSize,
-      fontWeight: FontWeight.w400,
-      color: Colors.white.withValues(alpha: 0.85),
-      maxLines: 2,
-      lineHeight: 1.4,
-      textAlign: TextAlign.center,
-    );
+    if (config.subtitle.isNotEmpty) {
+      canvas.drawParagraph(
+        subtitleParagraph,
+        Offset(sideMargin, topMargin + titleHeight + h * 0.01),
+      );
+    }
 
     // Screenshot area
     if (config.screenshot != null) {
@@ -317,6 +322,38 @@ class CoverRenderer {
     final paragraph = builder.build()
       ..layout(ui.ParagraphConstraints(width: rect.width));
     canvas.drawParagraph(paragraph, Offset(rect.left, rect.top));
+  }
+
+  static ui.Paragraph _buildParagraph({
+    required String text,
+    required double width,
+    required double fontSize,
+    required FontWeight fontWeight,
+    required int maxLines,
+    required double lineHeight,
+    required ui.TextAlign textAlign,
+    Color color = Colors.white,
+  }) {
+    final builder = ui.ParagraphBuilder(
+      ui.ParagraphStyle(
+        fontFamily: _fontFamily,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        maxLines: maxLines,
+        textAlign: textAlign,
+        height: lineHeight,
+      ),
+    )..pushStyle(
+      ui.TextStyle(
+        color: color,
+        fontFamily: _fontFamily,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+      ),
+    );
+    builder.addText(text);
+    return builder.build()
+      ..layout(ui.ParagraphConstraints(width: width));
   }
 
   static ui.TextAlign _mapAlign(TextAlign align) {
