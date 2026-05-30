@@ -26,6 +26,11 @@ class HomePage extends StatelessWidget {
     return CoverCaptureWrapper(
       showButton: true,
       backgroundColor: Colors.white,
+      appendStatusBar: true,
+      useSystemStatusBar: true, // 使用真实系统状态栏高度和当前时间
+      statusBarStyle: StatusBarStyle.ios,
+      statusBarColor: Colors.black,
+      statusBarTextColor: Colors.white,
       child: Scaffold(
         appBar: AppBar(title: const Text('My App')),
         body: ListView(

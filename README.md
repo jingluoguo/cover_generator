@@ -39,8 +39,12 @@ flutter pub get
 import 'package:cover_generator/cover_generator.dart';
 
 CoverCaptureWrapper(
-  showButton: true,        // 控制按钮显隐
-  backgroundColor: Colors.white,  // 截图背景色
+  showButton: true,             // 控制按钮显隐
+  backgroundColor: Colors.white, // 截图背景色
+  appendStatusBar: true,         // 追加状态栏到截图顶部
+  statusBarStyle: StatusBarStyle.ios,
+  statusBarColor: Colors.black,
+  statusBarTextColor: Colors.white,
   child: YourContentWidget(),
 )
 ```
