@@ -45,6 +45,9 @@ CoverCaptureWrapper(
   statusBarStyle: StatusBarStyle.ios,
   statusBarColor: Colors.black,
   statusBarTextColor: Colors.white,
+  initialLayout: CoverLayoutPresets.editorialLightPhone, // 初始风格
+  enableLayoutSelector: true, // 配置页是否允许切换风格
+  // layoutOptions: CoverLayoutPresets.options, // 可传入自定义风格列表
   child: YourContentWidget(),
 )
 ```
@@ -57,11 +60,16 @@ CoverCaptureWrapper(
 import 'package:cover_generator/cover_generator.dart';
 
 final controller = CoverGeneratorController();
+// 默认：选择/截取截图后自动提取顶部主色，更新背景渐变
+// controller.updateAutoExtractBackgroundColor(false); // 如需关闭可手动设置
 Navigator.of(context).push(
   MaterialPageRoute(
     builder: (_) => CoverGeneratorPage(controller: controller),
   ),
 );
+
+// 可选：默认使用“轻杂志风”模板
+controller.updateLayout(CoverLayoutPresets.editorialLightPhone);
 ```
 
 ### 方式三：仅用渲染引擎
@@ -79,6 +87,7 @@ final config = CoverConfig(
   startColor: Color(0xFF667eea),
   endColor: Color(0xFF764ba2),
   screenshot: myImage,  // 可选，dart:ui.Image
+  layout: CoverLayoutPresets.editorialLightPhone, // 可选：版式模板
 );
 
 final pngBytes = await CoverRenderer.render(config);

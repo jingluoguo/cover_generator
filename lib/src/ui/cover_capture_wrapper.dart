@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import '../controller/cover_generator_controller.dart';
+import '../models/cover_config.dart';
 import 'cover_generator_page.dart';
 
 enum StatusBarStyle { ios, android }
@@ -49,6 +50,15 @@ class CoverCaptureWrapper extends StatefulWidget {
   /// instead of the hardcoded "9:41".
   final bool useSystemStatusBar;
 
+  /// Initial layout style for the cover generator.
+  final CoverLayout initialLayout;
+
+  /// Whether to show layout selector chips in generator page.
+  final bool enableLayoutSelector;
+
+  /// Layout options available to end users.
+  final List<CoverLayoutOption> layoutOptions;
+
   const CoverCaptureWrapper({
     super.key,
     required this.child,
@@ -63,6 +73,9 @@ class CoverCaptureWrapper extends StatefulWidget {
     this.statusBarHeight = 56,
     this.statusBarStyle = StatusBarStyle.ios,
     this.useSystemStatusBar = false,
+    this.initialLayout = CoverLayoutPresets.classicGradient,
+    this.enableLayoutSelector = true,
+    this.layoutOptions = CoverLayoutPresets.options,
   });
 
   @override
@@ -77,6 +90,7 @@ class _CoverCaptureWrapperState extends State<CoverCaptureWrapper> {
   void initState() {
     super.initState();
     _controller = CoverGeneratorController();
+    _controller.updateLayout(widget.initialLayout);
   }
 
   @override
@@ -153,7 +167,11 @@ class _CoverCaptureWrapperState extends State<CoverCaptureWrapper> {
     if (!mounted) return;
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => CoverGeneratorPage(controller: _controller),
+        builder: (_) => CoverGeneratorPage(
+          controller: _controller,
+          enableLayoutSelector: widget.enableLayoutSelector,
+          layoutOptions: widget.layoutOptions,
+        ),
       ),
     );
   }

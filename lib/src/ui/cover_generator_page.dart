@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../controller/cover_generator_controller.dart';
+import '../models/cover_config.dart';
 import 'generated_result_page.dart';
 import 'widgets/color_picker.dart';
 import 'widgets/cover_preview.dart';
@@ -10,8 +11,15 @@ import 'widgets/text_inputs.dart';
 /// Main cover generator page. Accepts an externally-provided [controller].
 class CoverGeneratorPage extends StatefulWidget {
   final CoverGeneratorController controller;
+  final bool enableLayoutSelector;
+  final List<CoverLayoutOption> layoutOptions;
 
-  const CoverGeneratorPage({super.key, required this.controller});
+  const CoverGeneratorPage({
+    super.key,
+    required this.controller,
+    this.enableLayoutSelector = true,
+    this.layoutOptions = CoverLayoutPresets.options,
+  });
 
   @override
   State<CoverGeneratorPage> createState() => _CoverGeneratorPageState();
@@ -104,6 +112,10 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
                     onCustomHeightChanged: c.updateCustomHeight,
                   ),
                   const SizedBox(height: 20),
+                  if (widget.enableLayoutSelector) ...[
+                    _buildLayoutSection(),
+                    const SizedBox(height: 20),
+                  ],
                   GradientColorPicker(
                     startColor: c.startColor,
                     endColor: c.endColor,
@@ -162,6 +174,54 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLayoutSection() {
+    final options = widget.layoutOptions;
+    final selectedIndex = options.indexWhere((o) => o.layout == c.layout);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '风格',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            for (var i = 0; i < options.length; i++)
+              GestureDetector(
+                onTap: () => c.updateLayout(options[i].layout),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: i == selectedIndex
+                        ? const Color(0xFF667eea)
+                        : Colors.grey.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    options[i].label,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: i == selectedIndex ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
     );
   }
 

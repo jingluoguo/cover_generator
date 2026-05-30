@@ -7,34 +7,39 @@ import 'package:flutter/material.dart';
 import '../models/cover_config.dart';
 
 /// Canvas-based renderer that produces promotional cover images.
-///
-/// Uses [ui.PictureRecorder] + [Canvas] for deterministic, high-quality output.
-/// No widget tree or Flutter rendering pipeline involved.
 class CoverRenderer {
   static const String _fontFamily = 'HarmonyOS';
 
-  /// Render a cover image from the given [config].
-  /// Returns PNG-encoded bytes at the target resolution.
   static Future<Uint8List> render(CoverConfig config) async {
     final w = config.width;
     final h = config.height;
+    final layout = config.layout;
+
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, w, h));
 
-    _paintBackground(canvas, w, h, config.startColor, config.endColor);
-    _paintAmbientShapes(canvas, w, h, config.startColor, config.endColor);
+    _paintBackground(canvas, w, h, config.startColor, config.endColor, layout);
+    if (layout.showAmbientShapes) {
+      _paintAmbientShapes(canvas, w, h, config.startColor, config.endColor);
+    }
 
-    // Layout regions
-    final topMargin = h * 0.04;
-    final sideMargin = w * 0.07;
-    final gap = h * 0.02;
+    final topMargin = h * layout.topMarginRatio;
+    final sideMargin = w * layout.sideMarginRatio;
+    final gap = h * layout.sectionGapRatio;
 
-    // Pre-measure title and subtitle to calculate actual height
-    // Use min of width and height based scaling to handle different aspect ratios
     final baseSize = math.min(w, h);
     final titleFontSize = baseSize * 0.065;
     final subtitleFontSize = baseSize * 0.03;
     final titleContentWidth = w - sideMargin * 2;
+
+    final titleColor =
+        layout.backgroundStyle == CoverBackgroundStyle.softLight
+            ? const Color(0xFF111111)
+            : Colors.white;
+    final subtitleColor =
+        layout.backgroundStyle == CoverBackgroundStyle.softLight
+            ? const Color(0xFF6F747C)
+            : Colors.white.withValues(alpha: 0.85);
 
     final titleParagraph = _buildParagraph(
       text: config.title,
@@ -44,6 +49,7 @@ class CoverRenderer {
       maxLines: 2,
       lineHeight: 1.15,
       textAlign: ui.TextAlign.center,
+      color: titleColor,
     );
 
     final subtitleParagraph = _buildParagraph(
@@ -54,47 +60,38 @@ class CoverRenderer {
       maxLines: 2,
       lineHeight: 1.4,
       textAlign: ui.TextAlign.center,
-      color: Colors.white.withValues(alpha: 0.85),
+      color: subtitleColor,
     );
 
     final titleHeight = titleParagraph.height;
     final subtitleHeight = config.subtitle.isNotEmpty ? subtitleParagraph.height : 0;
-    final titleSpacing = config.subtitle.isNotEmpty ? h * 0.01 : 0.0;
+    final titleSpacing =
+        config.subtitle.isNotEmpty ? h * layout.titleSubtitleSpacingRatio : 0.0;
     final titleAreaHeight = titleHeight + subtitleHeight + titleSpacing;
 
-    // Calculate footer height based on actual text length
     final footerFontSize = w * 0.025;
     double bottomAreaHeight = 0;
+    ui.Paragraph? footerParagraph;
     if (config.footerText != null && config.footerText!.isNotEmpty) {
-      final footerParagraph =
-          (ui.ParagraphBuilder(
-                  ui.ParagraphStyle(
-                    fontFamily: _fontFamily,
-                    fontSize: footerFontSize,
-                    fontWeight: FontWeight.w600,
-                    maxLines: 2,
-                    textAlign: ui.TextAlign.center,
-                    height: 1.3,
-                  ),
-                )
-                ..pushStyle(
-                  ui.TextStyle(
-                    color: Colors.white,
-                    fontFamily: _fontFamily,
-                    fontSize: footerFontSize,
-                    fontWeight: FontWeight.w600,
-                  ),
-                )
-                ..addText(config.footerText!))
-              .build()
-            ..layout(ui.ParagraphConstraints(width: w - sideMargin * 2));
-      bottomAreaHeight =
-          footerParagraph.height + h * 0.04; // text height + padding
+      footerParagraph = _buildParagraph(
+        text: config.footerText!,
+        width: w - sideMargin * 2,
+        fontSize: footerFontSize,
+        fontWeight: FontWeight.w600,
+        maxLines: 2,
+        lineHeight: 1.3,
+        textAlign: ui.TextAlign.center,
+        color: subtitleColor,
+      );
+      bottomAreaHeight = footerParagraph.height + h * 0.04;
     }
 
-    // Screenshot area takes remaining height after title and footer
     final screenshotTop = topMargin + titleAreaHeight + gap;
-    final screenshotHeight = h - screenshotTop - bottomAreaHeight - gap;
+    final screenshotHeightRaw = h - screenshotTop - bottomAreaHeight - gap;
+    final screenshotHeight = math.max(
+      screenshotHeightRaw,
+      h * layout.screenshotHeightMinRatio,
+    );
     final screenshotArea = Rect.fromLTWH(
       sideMargin,
       screenshotTop,
@@ -102,51 +99,28 @@ class CoverRenderer {
       screenshotHeight,
     );
 
-    // Title — always displayed
-    canvas.drawParagraph(
-      titleParagraph,
-      Offset(sideMargin, topMargin),
-    );
+    canvas.drawParagraph(titleParagraph, Offset(sideMargin, topMargin));
 
-    // Subtitle — always displayed if exists.
     if (config.subtitle.isNotEmpty) {
       final subtitleTop = topMargin + titleHeight + titleSpacing;
-      canvas.drawParagraph(
-        subtitleParagraph,
-        Offset(sideMargin, subtitleTop),
-      );
+      canvas.drawParagraph(subtitleParagraph, Offset(sideMargin, subtitleTop));
     }
 
-    // Screenshot area
     if (config.screenshot != null) {
-      _drawScreenshot(canvas, config.screenshot!, screenshotArea);
+      _drawScreenshot(canvas, config.screenshot!, screenshotArea, layout);
     } else {
-      _drawPlaceholder(canvas, screenshotArea);
+      _drawPlaceholder(canvas, screenshotArea, layout);
     }
 
-    // Footer
-    if (config.footerText != null && config.footerText!.isNotEmpty) {
-      _drawText(
-        canvas,
-        text: config.footerText!,
-        rect: Rect.fromLTWH(
-          sideMargin,
-          h - bottomAreaHeight,
-          w - sideMargin * 2,
-          bottomAreaHeight,
-        ),
-        fontSize: footerFontSize,
-        fontWeight: FontWeight.w600,
-        color: Colors.white.withValues(alpha: 0.7),
-        maxLines: 2,
-        textAlign: TextAlign.center,
+    if (footerParagraph != null) {
+      canvas.drawParagraph(
+        footerParagraph,
+        Offset(sideMargin, h - bottomAreaHeight + h * 0.015),
       );
     }
 
     return _endRecording(recorder, w.toInt(), h.toInt());
   }
-
-  // ─── Background ───
 
   static void _paintBackground(
     Canvas canvas,
@@ -154,7 +128,26 @@ class CoverRenderer {
     double h,
     Color startColor,
     Color endColor,
+    CoverLayout layout,
   ) {
+    if (layout.backgroundStyle == CoverBackgroundStyle.softLight) {
+      final rect = Rect.fromLTWH(0, 0, w, h);
+      canvas.drawRect(rect, Paint()..color = const Color(0xFFF2F5F7));
+      canvas.drawRect(
+        rect,
+        Paint()
+          ..shader = ui.Gradient.radial(
+            Offset(w * 0.5, h * 0.3),
+            w * 0.95,
+            [
+              Colors.white.withValues(alpha: 0.86),
+              const Color(0xFFE4EBF0).withValues(alpha: 0.92),
+            ],
+          ),
+      );
+      return;
+    }
+
     canvas.drawRect(
       Rect.fromLTWH(0, 0, w, h),
       Paint()
@@ -173,7 +166,6 @@ class CoverRenderer {
     Color endColor,
   ) {
     final softPaint = Paint()
-      // ignore: prefer_const_constructors
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, w * 0.1);
 
     softPaint.color = Colors.white.withValues(alpha: 0.12);
@@ -184,60 +176,95 @@ class CoverRenderer {
 
     softPaint.color = endColor.withValues(alpha: 0.22);
     canvas.drawCircle(Offset(w * 0.12, h * 0.88), w * 0.16, softPaint);
-
-    // Decorative rounded rectangles
-    final accentPaint = Paint()..color = Colors.white.withValues(alpha: 0.06);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(w * 0.82, h * 0.7, w * 0.06, h * 0.12),
-        Radius.circular(w * 0.03),
-      ),
-      accentPaint,
-    );
-    canvas.save();
-    canvas.translate(w * 0.9, h * 0.3);
-    canvas.rotate(-math.pi / 9);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(center: Offset.zero, width: w * 0.08, height: h * 0.1),
-        Radius.circular(w * 0.03),
-      ),
-      accentPaint,
-    );
-    canvas.restore();
   }
 
-  // ─── Screenshot ───
+  static void _drawScreenshot(
+    Canvas canvas,
+    ui.Image image,
+    Rect area,
+    CoverLayout layout,
+  ) {
+    final frameThickness =
+        layout.deviceFrameEnabled ? area.width * layout.deviceFrameThicknessRatio : 0.0;
+    final insetX = frameThickness * layout.deviceScreenInsetXRatio;
+    final insetY = frameThickness * layout.deviceScreenInsetYRatio;
+    final outerRect = area;
+    final innerRect = layout.deviceFrameEnabled
+        ? Rect.fromLTWH(
+            area.left + insetX,
+            area.top + insetY,
+            math.max(1.0, area.width - insetX * 2),
+            math.max(1.0, area.height - insetY * 2),
+          )
+        : area;
 
-  static void _drawScreenshot(Canvas canvas, ui.Image image, Rect area) {
-    final radius = area.width * 0.035;
-    // Only round top corners, bottom is square (flush with canvas bottom).
-    final rrect = RRect.fromRectAndCorners(
-      area,
-      topLeft: Radius.circular(radius),
-      topRight: Radius.circular(radius),
-    );
+    final radius = innerRect.width * layout.screenshotCornerRadiusRatio;
+    final rrect =
+        layout.screenshotTopOnlyRounded
+            ? RRect.fromRectAndCorners(
+              innerRect,
+              topLeft: Radius.circular(radius),
+              topRight: Radius.circular(radius),
+            )
+            : RRect.fromRectAndRadius(innerRect, Radius.circular(radius));
 
-    // Shadow
+    if (layout.deviceFrameEnabled) {
+      final frameRadius = outerRect.width * (layout.screenshotCornerRadiusRatio + 0.01);
+      final frameRRect = RRect.fromRectAndRadius(
+        outerRect,
+        Radius.circular(frameRadius),
+      );
+      canvas.drawRRect(frameRRect, Paint()..color = layout.deviceFrameColor);
+      canvas.drawRRect(
+        frameRRect.deflate(math.max(1.0, frameThickness * 0.18)),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = math.max(1.0, frameThickness * 0.12)
+          ..color = Colors.white.withValues(alpha: 0.08),
+      );
+    }
+
     canvas.drawRRect(
-      rrect.shift(const Offset(0, 8)),
+      rrect.shift(Offset(0, area.height * layout.screenshotShadowDyRatio)),
       Paint()
         ..color = Colors.black.withValues(alpha: 0.25)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 20),
+        ..maskFilter =
+            MaskFilter.blur(BlurStyle.normal, area.width * layout.screenshotShadowBlurRatio),
     );
 
-    // Clip and draw image
     canvas.save();
     canvas.clipRRect(rrect);
 
-    // `topCenter` cover: fill area, center horizontally, anchor at top.
     final imgW = image.width.toDouble();
     final imgH = image.height.toDouble();
-    final scale = math.max(area.width / imgW, area.height / imgH);
-    final drawW = imgW * scale;
-    final drawH = imgH * scale;
-    final dx = area.left + (area.width - drawW) / 2;
-    final dy = area.top;
+
+    double drawW;
+    double drawH;
+    double dx;
+    double dy;
+    switch (layout.screenshotFitMode) {
+      case ScreenshotFitMode.containTopCenter:
+        final scale = math.min(innerRect.width / imgW, innerRect.height / imgH);
+        drawW = imgW * scale;
+        drawH = imgH * scale;
+        dx = innerRect.left + (innerRect.width - drawW) / 2;
+        dy = innerRect.top;
+        break;
+      case ScreenshotFitMode.containCenter:
+        final scale = math.min(innerRect.width / imgW, innerRect.height / imgH);
+        drawW = imgW * scale;
+        drawH = imgH * scale;
+        dx = innerRect.left + (innerRect.width - drawW) / 2;
+        dy = innerRect.top + (innerRect.height - drawH) / 2;
+        break;
+      case ScreenshotFitMode.coverTopCenter:
+        final scale = math.max(innerRect.width / imgW, innerRect.height / imgH);
+        drawW = imgW * scale;
+        drawH = imgH * scale;
+        dx = innerRect.left + (innerRect.width - drawW) / 2;
+        dy = innerRect.top;
+        break;
+    }
 
     canvas.drawImageRect(
       image,
@@ -247,36 +274,28 @@ class CoverRenderer {
     );
     canvas.restore();
 
-    // Border (top only)
     canvas.drawRRect(
       rrect,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2
-        ..color = Colors.white.withValues(alpha: 0.2),
+        ..strokeWidth = math.max(1.0, area.width * layout.screenshotBorderWidthRatio)
+        ..color = Colors.white.withValues(alpha: 0.22),
     );
   }
 
-  static void _drawPlaceholder(Canvas canvas, Rect area) {
-    final borderRadius = area.width * 0.035;
+  static void _drawPlaceholder(Canvas canvas, Rect area, CoverLayout layout) {
+    final borderRadius = area.width * layout.screenshotCornerRadiusRatio;
     final rrect = RRect.fromRectAndRadius(area, Radius.circular(borderRadius));
 
-    // Semi-transparent background
-    canvas.drawRRect(
-      rrect,
-      Paint()..color = Colors.white.withValues(alpha: 0.1),
-    );
-
-    // Border
+    canvas.drawRRect(rrect, Paint()..color = Colors.white.withValues(alpha: 0.1));
     canvas.drawRRect(
       rrect,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2
+        ..strokeWidth = math.max(1.0, area.width * layout.screenshotBorderWidthRatio)
         ..color = Colors.white.withValues(alpha: 0.2),
     );
 
-    // Placeholder text
     _drawText(
       canvas,
       text: '📱',
@@ -292,8 +311,6 @@ class CoverRenderer {
       textAlign: TextAlign.center,
     );
   }
-
-  // ─── Text ───
 
   static void _drawText(
     Canvas canvas, {
@@ -373,8 +390,6 @@ class CoverRenderer {
       _ => ui.TextAlign.left,
     };
   }
-
-  // ─── Finalize ───
 
   static Future<Uint8List> _endRecording(
     ui.PictureRecorder recorder,

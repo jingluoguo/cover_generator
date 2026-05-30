@@ -16,9 +16,11 @@ class CoverGeneratorController extends ChangeNotifier {
   String title = 'My App';
   String subtitle = 'The best app ever';
   String footerText = '';
+  CoverLayout layout = CoverLayoutPresets.classicGradient;
 
   Color startColor = const Color(0xFF667eea);
   Color endColor = const Color(0xFF764ba2);
+  bool autoExtractBackgroundColor = true;
 
   int selectedPresetIndex = 0;
   double customWidth = 1290;
@@ -52,9 +54,14 @@ class CoverGeneratorController extends ChangeNotifier {
   void updateTitle(String v) { title = v; notifyListeners(); }
   void updateSubtitle(String v) { subtitle = v; notifyListeners(); }
   void updateFooterText(String v) { footerText = v; notifyListeners(); }
+  void updateLayout(CoverLayout v) { layout = v; notifyListeners(); }
 
   void updateStartColor(Color v) { startColor = v; notifyListeners(); }
   void updateEndColor(Color v) { endColor = v; notifyListeners(); }
+  void updateAutoExtractBackgroundColor(bool v) {
+    autoExtractBackgroundColor = v;
+    notifyListeners();
+  }
 
   void selectPreset(int index) { selectedPresetIndex = index; notifyListeners(); }
   void updateCustomWidth(double v) { customWidth = v; notifyListeners(); }
@@ -64,7 +71,78 @@ class CoverGeneratorController extends ChangeNotifier {
     screenshotImage?.dispose();
     screenshotImage = image;
     screenshotPath = path;
+    if (autoExtractBackgroundColor) {
+      _extractAndApplyBackgroundColors(image);
+    }
     notifyListeners();
+  }
+
+  Future<void> _extractAndApplyBackgroundColors(ui.Image image) async {
+    try {
+      final data = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+      if (data == null) return;
+
+      final bytes = data.buffer.asUint8List();
+      final w = image.width;
+      final h = image.height;
+      if (w <= 0 || h <= 0) return;
+
+      // Sample top region so background color matches screenshot header area.
+      final sampleTop = 0;
+      final sampleBottom = (h * 0.28).toInt().clamp(1, h);
+      final sampleLeft = (w * 0.08).toInt().clamp(0, w - 1);
+      final sampleRight = (w * 0.92).toInt().clamp(1, w);
+
+      final stepX = (w / 48).toInt().clamp(1, 24);
+      final stepY = (h / 96).toInt().clamp(1, 24);
+
+      var r = 0.0;
+      var g = 0.0;
+      var b = 0.0;
+      var count = 0;
+
+      for (var y = sampleTop; y < sampleBottom; y += stepY) {
+        for (var x = sampleLeft; x < sampleRight; x += stepX) {
+          final i = (y * w + x) * 4;
+          final rr = bytes[i];
+          final gg = bytes[i + 1];
+          final bb = bytes[i + 2];
+          final aa = bytes[i + 3];
+          if (aa < 20) continue;
+          r += rr;
+          g += gg;
+          b += bb;
+          count++;
+        }
+      }
+
+      if (count == 0) return;
+      final base = Color.fromARGB(
+        255,
+        (r / count).round().clamp(0, 255),
+        (g / count).round().clamp(0, 255),
+        (b / count).round().clamp(0, 255),
+      );
+
+      final hsl = HSLColor.fromColor(base);
+      final s = (hsl.saturation * 0.82).clamp(0.18, 0.75);
+      final l = hsl.lightness;
+      final start = hsl
+          .withSaturation(s)
+          .withLightness((l + 0.12).clamp(0.0, 1.0))
+          .toColor();
+      final end = hsl
+          .withHue((hsl.hue + 18) % 360)
+          .withSaturation((s + 0.08).clamp(0.0, 1.0))
+          .withLightness((l - 0.08).clamp(0.0, 1.0))
+          .toColor();
+
+      startColor = start;
+      endColor = end;
+      notifyListeners();
+    } catch (_) {
+      // Ignore extraction failures and keep current colors.
+    }
   }
 
   // ─── Actions ───
@@ -126,6 +204,7 @@ class CoverGeneratorController extends ChangeNotifier {
       endColor: endColor,
       screenshot: screenshotImage,
       footerText: footerText.isEmpty ? null : footerText,
+      layout: layout,
     );
   }
 
