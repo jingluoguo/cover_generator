@@ -1,0 +1,26 @@
+name: cover_generator
+description: >
+  A Flutter package for generating promotional cover images (App Store, Play Store)
+  with customizable title, subtitle, gradient colors, and embedded screenshots.
+  Uses Canvas-based rendering for deterministic, high-quality output.
+version: 1.0.0
+homepage: https://github.com/jingluoguo/cover_generator
+repository: https://github.com/jingluoguo/cover_generator
+
+environment:
+  sdk: ^3.9.2
+  flutter: '>=3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  image_picker: ^1.0.0
+  share_plus: ^10.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
