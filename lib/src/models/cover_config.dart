@@ -263,7 +263,7 @@ class CoverLayoutPresets {
     deviceFrameColor: Color(0xFF06070A),
     deviceFrameThicknessRatio: 0.024,
     deviceScreenInsetXRatio: 1.35,
-    deviceScreenInsetYRatio: 1.75,
+    deviceScreenInsetYRatio: 1.45,
   );
 
   static const List<CoverLayoutOption> options = [

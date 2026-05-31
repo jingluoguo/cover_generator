@@ -249,8 +249,8 @@ class _CoverCaptureWrapperState extends State<CoverCaptureWrapper> {
   ) {
     final iconSize = statusHeight * 0.35;
     final centerY = statusHeight / 2;
-    final leftPadding = 20.0;
-    final rightPadding = 16.0;
+    final leftPadding = math.max(24.0, width * 0.055);
+    final rightPadding = math.max(20.0, width * 0.05);
 
     // Left: Signal bars (4 bars with increasing height, bottom-aligned).
     final barWidth = iconSize * 0.18;
@@ -399,8 +399,8 @@ class _CoverCaptureWrapperState extends State<CoverCaptureWrapper> {
   ) {
     final iconSize = statusHeight * 0.38;
     final centerY = statusHeight / 2;
-    final leftPadding = 16.0;
-    final rightPadding = 12.0;
+    final leftPadding = math.max(20.0, width * 0.05);
+    final rightPadding = math.max(16.0, width * 0.045);
 
     // Left: Time.
     final timeStyle = TextStyle(
