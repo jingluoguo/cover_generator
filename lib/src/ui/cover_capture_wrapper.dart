@@ -56,6 +56,21 @@ class CoverCaptureWrapper extends StatefulWidget {
   /// Layout options available to end users.
   final List<CoverLayoutOption> layoutOptions;
 
+  /// Global font family for title/subtitle/footer.
+  final String? fontFamily;
+
+  /// Font package when using a font declared in another package.
+  final String? fontPackage;
+
+  /// Title font family override.
+  final String? titleFontFamily;
+
+  /// Subtitle font family override.
+  final String? subtitleFontFamily;
+
+  /// Footer font family override.
+  final String? footerFontFamily;
+
   const CoverCaptureWrapper({
     super.key,
     required this.child,
@@ -73,6 +88,11 @@ class CoverCaptureWrapper extends StatefulWidget {
     this.initialLayout = CoverLayoutPresets.classicGradient,
     this.enableLayoutSelector = true,
     this.layoutOptions = CoverLayoutPresets.options,
+    this.fontFamily,
+    this.fontPackage,
+    this.titleFontFamily,
+    this.subtitleFontFamily,
+    this.footerFontFamily,
   });
 
   @override
@@ -87,6 +107,11 @@ class _CoverCaptureWrapperState extends State<CoverCaptureWrapper> {
   void initState() {
     super.initState();
     _controller = CoverGeneratorController();
+    _controller.updateFontFamily(widget.fontFamily);
+    _controller.updateFontPackage(widget.fontPackage);
+    _controller.updateTitleFontFamily(widget.titleFontFamily);
+    _controller.updateSubtitleFontFamily(widget.subtitleFontFamily);
+    _controller.updateFooterFontFamily(widget.footerFontFamily);
     _controller.updateLayout(
       widget.initialLayout.copyWith(
         statusBarEnabled: widget.appendStatusBar,

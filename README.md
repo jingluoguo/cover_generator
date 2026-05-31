@@ -11,6 +11,7 @@
 - 📐 **多尺寸预设** — iPhone 6.7"/6.5"/5.5"、iPad、Play Store、Android + 自定义尺寸
 - 🌈 **渐变色选择** — 10 种预设渐变 + HSV 调色盘自定义
 - ✏️ **文本自定义** — 标题、副标题、底部文字
+- 🔤 **字体可配置** — 支持统一字体与标题/副标题/footer 分别指定
 - 📤 **分享 & 保存** — 基于 `share_plus` 的分享功能
 - 🧩 **零侵入** — 不依赖宿主项目路由，独立运行
 
@@ -45,7 +46,12 @@ CoverCaptureWrapper(
   statusBarStyle: StatusBarStyle.ios,
   statusBarColor: Colors.black,
   statusBarTextColor: Colors.white,
-  initialLayout: CoverLayoutPresets.iphoneRealistic, // 初始风格（真机风）
+  initialLayout: CoverLayoutPresets.editorialLightPhone, // 初始风格
+  fontFamily: 'HarmonyOS Sans SC',    // 全局字体（可选）
+  // fontPackage: 'your_font_package', // 字体来自其他 package 时填写（可选）
+  // titleFontFamily: 'DIN Pro',      // 单独覆盖标题字体（可选）
+  // subtitleFontFamily: 'HarmonyOS Sans SC',
+  // footerFontFamily: 'HarmonyOS Sans SC',
   enableLayoutSelector: true, // 配置页是否允许切换风格
   // layoutOptions: CoverLayoutPresets.options, // 可传入自定义风格列表
   child: YourContentWidget(),
@@ -62,6 +68,11 @@ import 'package:cover_generator/cover_generator.dart';
 final controller = CoverGeneratorController();
 // 默认：选择/截取截图后自动提取顶部主色，更新背景渐变
 // controller.updateAutoExtractBackgroundColor(false); // 如需关闭可手动设置
+controller.updateFontFamily('HarmonyOS Sans SC'); // 全局字体（可选）
+// controller.updateFontPackage('your_font_package'); // 字体来自其他 package 时填写
+// controller.updateTitleFontFamily('DIN Pro');     // 单独覆盖（可选）
+// controller.updateSubtitleFontFamily('HarmonyOS Sans SC');
+// controller.updateFooterFontFamily('HarmonyOS Sans SC');
 Navigator.of(context).push(
   MaterialPageRoute(
     builder: (_) => CoverGeneratorPage(controller: controller),
@@ -69,7 +80,7 @@ Navigator.of(context).push(
 );
 
 // 可选：默认使用“轻杂志风”模板
-controller.updateLayout(CoverLayoutPresets.iphoneRealistic);
+controller.updateLayout(CoverLayoutPresets.editorialLightPhone);
 ```
 
 ### 方式三：仅用渲染引擎
@@ -86,12 +97,23 @@ final config = CoverConfig(
   height: 2796,
   startColor: Color(0xFF667eea),
   endColor: Color(0xFF764ba2),
+  fontFamily: 'HarmonyOS Sans SC', // 全局字体（可选）
+  // fontPackage: 'your_font_package', // 字体来自其他 package 时填写（可选）
+  // titleFontFamily: 'DIN Pro',   // 单独覆盖（可选）
+  // subtitleFontFamily: 'HarmonyOS Sans SC',
+  // footerFontFamily: 'HarmonyOS Sans SC',
   screenshot: myImage,  // 可选，dart:ui.Image
   layout: CoverLayoutPresets.editorialLightPhone, // 可选：版式模板
 );
 
 final pngBytes = await CoverRenderer.render(config);
 ```
+
+### 字体不生效排查
+
+- `fontFamily` 需要传 **字体族名（family）**，不是 `ttf/otf` 文件名或路径。
+- 使用自定义字体时，需要先在宿主 App 的 `pubspec.yaml` 注册该字体。
+- 如果字体定义在第三方 package 里，请额外传 `fontPackage`。
 
 ## 📐 内置尺寸预设
 

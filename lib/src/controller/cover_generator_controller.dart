@@ -20,6 +20,11 @@ class CoverGeneratorController extends ChangeNotifier {
 
   Color startColor = const Color(0xFF667eea);
   Color endColor = const Color(0xFF764ba2);
+  String? fontFamily;
+  String? fontPackage;
+  String? titleFontFamily;
+  String? subtitleFontFamily;
+  String? footerFontFamily;
   bool autoExtractBackgroundColor = true;
 
   int selectedPresetIndex = 0;
@@ -58,6 +63,11 @@ class CoverGeneratorController extends ChangeNotifier {
 
   void updateStartColor(Color v) { startColor = v; notifyListeners(); }
   void updateEndColor(Color v) { endColor = v; notifyListeners(); }
+  void updateFontFamily(String? v) { fontFamily = v; notifyListeners(); }
+  void updateFontPackage(String? v) { fontPackage = v; notifyListeners(); }
+  void updateTitleFontFamily(String? v) { titleFontFamily = v; notifyListeners(); }
+  void updateSubtitleFontFamily(String? v) { subtitleFontFamily = v; notifyListeners(); }
+  void updateFooterFontFamily(String? v) { footerFontFamily = v; notifyListeners(); }
   void updateAutoExtractBackgroundColor(bool v) {
     autoExtractBackgroundColor = v;
     notifyListeners();
@@ -202,6 +212,11 @@ class CoverGeneratorController extends ChangeNotifier {
       height: effectiveHeight,
       startColor: startColor,
       endColor: endColor,
+      fontFamily: fontFamily,
+      fontPackage: fontPackage,
+      titleFontFamily: titleFontFamily,
+      subtitleFontFamily: subtitleFontFamily,
+      footerFontFamily: footerFontFamily,
       screenshot: screenshotImage,
       footerText: footerText.isEmpty ? null : footerText,
       layout: layout,

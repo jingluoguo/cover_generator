@@ -8,7 +8,7 @@ import '../models/cover_config.dart';
 
 /// Canvas-based renderer that produces promotional cover images.
 class CoverRenderer {
-  static const String _fontFamily = 'HarmonyOS';
+  static const String _defaultFontFamily = 'HarmonyOS';
 
   static Future<Uint8List> render(CoverConfig config) async {
     final w = config.width;
@@ -50,6 +50,8 @@ class CoverRenderer {
       lineHeight: 1.15,
       textAlign: ui.TextAlign.center,
       color: titleColor,
+      fontFamily: config.titleFontFamily ?? config.fontFamily,
+      fontPackage: config.fontPackage,
     );
 
     final subtitleParagraph = _buildParagraph(
@@ -61,6 +63,8 @@ class CoverRenderer {
       lineHeight: 1.4,
       textAlign: ui.TextAlign.center,
       color: subtitleColor,
+      fontFamily: config.subtitleFontFamily ?? config.fontFamily,
+      fontPackage: config.fontPackage,
     );
 
     final titleHeight = titleParagraph.height;
@@ -82,6 +86,8 @@ class CoverRenderer {
         lineHeight: 1.3,
         textAlign: ui.TextAlign.center,
         color: subtitleColor,
+        fontFamily: config.footerFontFamily ?? config.fontFamily,
+        fontPackage: config.fontPackage,
       );
       bottomAreaHeight = footerParagraph.height + h * 0.04;
     }
@@ -622,7 +628,7 @@ class CoverRenderer {
     final builder =
         ui.ParagraphBuilder(
           ui.ParagraphStyle(
-            fontFamily: _fontFamily,
+            fontFamily: _defaultFontFamily,
             fontSize: fontSize,
             fontWeight: fontWeight,
             maxLines: maxLines,
@@ -632,7 +638,7 @@ class CoverRenderer {
         )..pushStyle(
           ui.TextStyle(
             color: color,
-            fontFamily: _fontFamily,
+            fontFamily: _defaultFontFamily,
             fontSize: fontSize,
             fontWeight: fontWeight,
           ),
@@ -652,10 +658,15 @@ class CoverRenderer {
     required double lineHeight,
     required ui.TextAlign textAlign,
     Color color = Colors.white,
+    String? fontFamily,
+    String? fontPackage,
   }) {
+    final resolvedFontFamily =
+        _resolveFontFamily(fontFamily: fontFamily, fontPackage: fontPackage) ??
+        _defaultFontFamily;
     final builder = ui.ParagraphBuilder(
       ui.ParagraphStyle(
-        fontFamily: _fontFamily,
+        fontFamily: resolvedFontFamily,
         fontSize: fontSize,
         fontWeight: fontWeight,
         maxLines: maxLines,
@@ -665,7 +676,7 @@ class CoverRenderer {
     )..pushStyle(
       ui.TextStyle(
         color: color,
-        fontFamily: _fontFamily,
+        fontFamily: resolvedFontFamily,
         fontSize: fontSize,
         fontWeight: fontWeight,
       ),
@@ -673,6 +684,23 @@ class CoverRenderer {
     builder.addText(text);
     return builder.build()
       ..layout(ui.ParagraphConstraints(width: width));
+  }
+
+  static String? _resolveFontFamily({
+    required String? fontFamily,
+    required String? fontPackage,
+  }) {
+    final normalized = fontFamily?.trim();
+    if (normalized == null || normalized.isEmpty) return null;
+
+    final packageName = fontPackage?.trim();
+    if (packageName == null || packageName.isEmpty) {
+      return normalized;
+    }
+    if (normalized.startsWith('packages/')) {
+      return normalized;
+    }
+    return 'packages/$packageName/$normalized';
   }
 
   static ui.TextAlign _mapAlign(TextAlign align) {

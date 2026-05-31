@@ -9,6 +9,11 @@ class CoverConfig {
   final double height;
   final Color startColor;
   final Color endColor;
+  final String? fontFamily;
+  final String? fontPackage;
+  final String? titleFontFamily;
+  final String? subtitleFontFamily;
+  final String? footerFontFamily;
   final ui.Image? screenshot;
   final String? footerText;
   final CoverLayout layout;
@@ -20,6 +25,11 @@ class CoverConfig {
     required this.height,
     required this.startColor,
     required this.endColor,
+    this.fontFamily,
+    this.fontPackage,
+    this.titleFontFamily,
+    this.subtitleFontFamily,
+    this.footerFontFamily,
     this.screenshot,
     this.footerText,
     this.layout = const CoverLayout(),
@@ -32,6 +42,11 @@ class CoverConfig {
     double? height,
     Color? startColor,
     Color? endColor,
+    String? fontFamily,
+    String? fontPackage,
+    String? titleFontFamily,
+    String? subtitleFontFamily,
+    String? footerFontFamily,
     ui.Image? screenshot,
     String? footerText,
     CoverLayout? layout,
@@ -43,6 +58,11 @@ class CoverConfig {
       height: height ?? this.height,
       startColor: startColor ?? this.startColor,
       endColor: endColor ?? this.endColor,
+      fontFamily: fontFamily ?? this.fontFamily,
+      fontPackage: fontPackage ?? this.fontPackage,
+      titleFontFamily: titleFontFamily ?? this.titleFontFamily,
+      subtitleFontFamily: subtitleFontFamily ?? this.subtitleFontFamily,
+      footerFontFamily: footerFontFamily ?? this.footerFontFamily,
       screenshot: screenshot ?? this.screenshot,
       footerText: footerText ?? this.footerText,
       layout: layout ?? this.layout,
