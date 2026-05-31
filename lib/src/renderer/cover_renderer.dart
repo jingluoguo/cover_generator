@@ -268,6 +268,21 @@ class CoverRenderer {
       Rect.fromLTWH(dx, dy, drawW, drawH),
       Paint()..filterQuality = FilterQuality.high,
     );
+
+    if (
+        layout.deviceIslandEnabled &&
+        !(layout.statusBarEnabled && layout.statusBarStyle == CoverStatusBarStyle.ios)) {
+      _drawDeviceIsland(canvas, innerRect, layout);
+    }
+
+    if (layout.statusBarEnabled) {
+      _drawStatusBar(canvas, innerRect, layout);
+    }
+
+    if (layout.homeIndicatorEnabled) {
+      _drawHomeIndicator(canvas, innerRect, layout);
+    }
+
     canvas.restore();
 
     // No inner stroke for framed layout to avoid corner arc artifacts.
@@ -308,6 +323,287 @@ class CoverRenderer {
       color: Colors.white.withValues(alpha: 0.3),
       maxLines: 1,
       textAlign: TextAlign.center,
+    );
+  }
+
+  static void _drawDeviceIsland(
+    Canvas canvas,
+    Rect screenRect,
+    CoverLayout layout,
+  ) {
+    final islandWidth = screenRect.width * layout.deviceIslandWidthRatio;
+    final islandHeight = screenRect.height * layout.deviceIslandHeightRatio;
+    final islandCenterY =
+        screenRect.top + screenRect.height * layout.deviceIslandTopInsetRatio;
+    final islandRect = Rect.fromCenter(
+      center: Offset(screenRect.center.dx, islandCenterY),
+      width: islandWidth,
+      height: islandHeight,
+    );
+    final islandRadius = islandHeight / 2;
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(islandRect, Radius.circular(islandRadius)),
+      Paint()..color = const Color(0xFF05070B),
+    );
+  }
+
+  static void _drawStatusBar(
+    Canvas canvas,
+    Rect screenRect,
+    CoverLayout layout,
+  ) {
+    final statusHeight = screenRect.height * layout.statusBarHeightRatio;
+    final rect = Rect.fromLTWH(
+      screenRect.left,
+      screenRect.top,
+      screenRect.width,
+      statusHeight,
+    );
+
+    if (layout.statusBarStyle == CoverStatusBarStyle.ios) {
+      _drawIosStatusBar(
+        canvas,
+        rect,
+        screenRect,
+        layout,
+        layout.statusBarForegroundColor,
+        layout.statusBarTimeText,
+      );
+    } else {
+      canvas.drawRect(
+        rect,
+        Paint()..color = layout.statusBarBackgroundColor,
+      );
+      _drawAndroidStatusBar(
+        canvas,
+        rect,
+        layout.statusBarForegroundColor,
+        layout.statusBarTimeText,
+      );
+    }
+  }
+
+  static void _drawIosStatusBar(
+    Canvas canvas,
+    Rect rect,
+    Rect screenRect,
+    CoverLayout layout,
+    Color iconColor,
+    String time,
+  ) {
+    final statusHeight = rect.height;
+    final width = rect.width;
+    final iconSize = statusHeight * 0.40;
+    final centerY = screenRect.top + screenRect.height * layout.deviceIslandTopInsetRatio;
+    final leftPadding = math.max(24.0, width * 0.055);
+    final rightPadding = math.max(20.0, width * 0.05);
+    final islandWidth = screenRect.width * layout.deviceIslandWidthRatio;
+    final islandHeight = screenRect.height * layout.deviceIslandHeightRatio;
+
+    final timeStyle = TextStyle(
+      color: iconColor,
+      fontSize: statusHeight * 0.34,
+      fontWeight: FontWeight.w600,
+      letterSpacing: -0.3,
+    );
+    final timePainter = TextPainter(
+      text: TextSpan(text: time, style: timeStyle),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    timePainter.paint(
+      canvas,
+      Offset(rect.left + leftPadding, centerY - timePainter.height / 2),
+    );
+
+    if (layout.deviceIslandEnabled) {
+      final islandRect = Rect.fromCenter(
+        center: Offset(screenRect.center.dx, centerY),
+        width: islandWidth,
+        height: islandHeight,
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          islandRect,
+          Radius.circular(islandHeight / 2),
+        ),
+        Paint()..color = const Color(0xFF05070B),
+      );
+    }
+
+    final batteryWidth = iconSize * 1.28;
+    final batteryHeight = iconSize * 0.62;
+    final batteryRight = rect.right - rightPadding;
+    final batteryTop = centerY - batteryHeight / 2;
+    final batteryLeft = batteryRight - batteryWidth;
+    final batteryRect = Rect.fromLTWH(
+      batteryLeft,
+      batteryTop,
+      batteryWidth,
+      batteryHeight,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        batteryRect,
+        Radius.circular(batteryHeight * 0.25),
+      ),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0
+        ..color = iconColor,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          batteryLeft + 2,
+          batteryTop + 2,
+          (batteryWidth - 5) * 0.85,
+          batteryHeight - 4,
+        ),
+        Radius.circular(batteryHeight * 0.15),
+      ),
+      Paint()..color = iconColor,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          batteryRight,
+          batteryTop + batteryHeight * 0.25,
+          batteryWidth * 0.08,
+          batteryHeight * 0.5,
+        ),
+        Radius.circular(1),
+      ),
+      Paint()..color = iconColor,
+    );
+
+    final wifiRight = batteryLeft - iconSize * 1.15;
+    _drawWifiIcon(canvas, Offset(wifiRight, centerY), iconSize * 1.05, iconColor);
+  }
+
+  static void _drawAndroidStatusBar(
+    Canvas canvas,
+    Rect rect,
+    Color iconColor,
+    String time,
+  ) {
+    final statusHeight = rect.height;
+    final width = rect.width;
+    final iconSize = statusHeight * 0.38;
+    final centerY = rect.top + statusHeight / 2;
+    final leftPadding = math.max(20.0, width * 0.05);
+    final rightPadding = math.max(16.0, width * 0.045);
+
+    final timeStyle = TextStyle(
+      color: iconColor,
+      fontSize: statusHeight * 0.38,
+      fontWeight: FontWeight.w500,
+    );
+    final timePainter = TextPainter(
+      text: TextSpan(text: time, style: timeStyle),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    timePainter.paint(
+      canvas,
+      Offset(rect.left + leftPadding, centerY - timePainter.height / 2),
+    );
+
+    final batteryWidth = iconSize * 1.1;
+    final batteryHeight = iconSize * 0.55;
+    final batteryRight = rect.right - rightPadding;
+    final batteryTop = centerY - batteryHeight / 2;
+    final batteryLeft = batteryRight - batteryWidth;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(batteryLeft, batteryTop, batteryWidth, batteryHeight),
+        Radius.circular(batteryHeight * 0.2),
+      ),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2
+        ..color = iconColor,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          batteryLeft + 1.5,
+          batteryTop + 1.5,
+          (batteryWidth - 4) * 0.82,
+          batteryHeight - 3,
+        ),
+        Radius.circular(batteryHeight * 0.1),
+      ),
+      Paint()..color = iconColor,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(
+        batteryRight,
+        batteryTop + batteryHeight * 0.22,
+        batteryWidth * 0.06,
+        batteryHeight * 0.56,
+      ),
+      Paint()..color = iconColor,
+    );
+
+    final wifiRight = batteryLeft - 14;
+    _drawWifiIcon(canvas, Offset(wifiRight, centerY), iconSize * 1.1, iconColor);
+  }
+
+  static void _drawWifiIcon(
+    Canvas canvas,
+    Offset center,
+    double size,
+    Color iconColor,
+  ) {
+    final paint = Paint()
+      ..color = iconColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = size * 0.1
+      ..strokeCap = StrokeCap.round;
+    final radii = [size * 0.45, size * 0.32, size * 0.19];
+    for (final r in radii) {
+      canvas.drawArc(
+        Rect.fromCircle(
+          center: Offset(center.dx, center.dy + size * 0.15),
+          radius: r,
+        ),
+        -math.pi * 0.75,
+        math.pi * 0.5,
+        false,
+        paint,
+      );
+    }
+    canvas.drawCircle(
+      Offset(center.dx, center.dy + size * 0.15),
+      size * 0.06,
+      Paint()..color = iconColor,
+    );
+  }
+
+  static void _drawHomeIndicator(
+    Canvas canvas,
+    Rect screenRect,
+    CoverLayout layout,
+  ) {
+    final indicatorWidth = screenRect.width * layout.homeIndicatorWidthRatio;
+    final indicatorHeight = screenRect.height * layout.homeIndicatorHeightRatio;
+    final indicatorBottom =
+        screenRect.bottom - screenRect.height * layout.homeIndicatorBottomInsetRatio;
+    final indicatorRect = Rect.fromCenter(
+      center: Offset(
+        screenRect.center.dx,
+        indicatorBottom - indicatorHeight / 2,
+      ),
+      width: indicatorWidth,
+      height: indicatorHeight,
+    );
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        indicatorRect,
+        Radius.circular(indicatorHeight / 2),
+      ),
+      Paint()..color = Colors.black.withValues(alpha: 0.85),
     );
   }
 

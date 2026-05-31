@@ -52,6 +52,8 @@ class CoverConfig {
 
 enum CoverBackgroundStyle { gradient, softLight }
 
+enum CoverStatusBarStyle { ios, android }
+
 enum ScreenshotFitMode { coverTopCenter, containTopCenter, containCenter }
 
 class CoverLayout {
@@ -100,6 +102,24 @@ class CoverLayout {
   /// - `containCenter`: 完整显示并居中
   final ScreenshotFitMode screenshotFitMode;
 
+  /// 是否绘制状态栏。
+  final bool statusBarEnabled;
+
+  /// 状态栏样式：iOS 或 Android。
+  final CoverStatusBarStyle statusBarStyle;
+
+  /// 状态栏背景色。
+  final Color statusBarBackgroundColor;
+
+  /// 状态栏文字与图标颜色。
+  final Color statusBarForegroundColor;
+
+  /// 状态栏高度比例（相对屏幕内容高度）。
+  final double statusBarHeightRatio;
+
+  /// 状态栏显示时间文本。
+  final String statusBarTimeText;
+
   /// 是否仅保留顶部圆角。
   /// true 适合“上圆下直”海报风格，false 为四角统一圆角。
   final bool screenshotTopOnlyRounded;
@@ -122,6 +142,30 @@ class CoverLayout {
   /// 值越大，截图离上下黑边越远。
   final double deviceScreenInsetYRatio;
 
+  /// 是否绘制顶部灵动岛/刘海。
+  final bool deviceIslandEnabled;
+
+  /// 灵动岛/刘海宽度比例（相对屏幕内容宽度）。
+  final double deviceIslandWidthRatio;
+
+  /// 灵动岛/刘海高度比例（相对屏幕内容高度）。
+  final double deviceIslandHeightRatio;
+
+  /// 灵动岛/刘海距离屏幕顶部的偏移比例（相对屏幕内容高度）。
+  final double deviceIslandTopInsetRatio;
+
+  /// 是否绘制底部 Home Indicator。
+  final bool homeIndicatorEnabled;
+
+  /// Home Indicator 宽度比例（相对屏幕内容宽度）。
+  final double homeIndicatorWidthRatio;
+
+  /// Home Indicator 高度比例（相对屏幕内容高度）。
+  final double homeIndicatorHeightRatio;
+
+  /// Home Indicator 距离屏幕底部的偏移比例（相对屏幕内容高度）。
+  final double homeIndicatorBottomInsetRatio;
+
   const CoverLayout({
     this.backgroundStyle = CoverBackgroundStyle.gradient,
     this.showAmbientShapes = true,
@@ -135,12 +179,26 @@ class CoverLayout {
     this.screenshotBorderWidthRatio = 0.0015,
     this.screenshotHeightMinRatio = 0.42,
     this.screenshotFitMode = ScreenshotFitMode.coverTopCenter,
+    this.statusBarEnabled = false,
+    this.statusBarStyle = CoverStatusBarStyle.ios,
+    this.statusBarBackgroundColor = const Color(0xFF0E1228),
+    this.statusBarForegroundColor = Colors.white,
+    this.statusBarHeightRatio = 0.06,
+    this.statusBarTimeText = '9:41',
     this.screenshotTopOnlyRounded = true,
     this.deviceFrameEnabled = false,
     this.deviceFrameColor = const Color(0xFF0B0C0F),
     this.deviceFrameThicknessRatio = 0.026,
     this.deviceScreenInsetXRatio = 1.0,
     this.deviceScreenInsetYRatio = 1.0,
+    this.deviceIslandEnabled = false,
+    this.deviceIslandWidthRatio = 0.28,
+    this.deviceIslandHeightRatio = 0.065,
+    this.deviceIslandTopInsetRatio = 0.02,
+    this.homeIndicatorEnabled = false,
+    this.homeIndicatorWidthRatio = 0.24,
+    this.homeIndicatorHeightRatio = 0.012,
+    this.homeIndicatorBottomInsetRatio = 0.02,
   });
 
   CoverLayout copyWith({
@@ -156,12 +214,26 @@ class CoverLayout {
     double? screenshotBorderWidthRatio,
     double? screenshotHeightMinRatio,
     ScreenshotFitMode? screenshotFitMode,
+    bool? statusBarEnabled,
+    CoverStatusBarStyle? statusBarStyle,
+    Color? statusBarBackgroundColor,
+    Color? statusBarForegroundColor,
+    double? statusBarHeightRatio,
+    String? statusBarTimeText,
     bool? screenshotTopOnlyRounded,
     bool? deviceFrameEnabled,
     Color? deviceFrameColor,
     double? deviceFrameThicknessRatio,
     double? deviceScreenInsetXRatio,
     double? deviceScreenInsetYRatio,
+    bool? deviceIslandEnabled,
+    double? deviceIslandWidthRatio,
+    double? deviceIslandHeightRatio,
+    double? deviceIslandTopInsetRatio,
+    bool? homeIndicatorEnabled,
+    double? homeIndicatorWidthRatio,
+    double? homeIndicatorHeightRatio,
+    double? homeIndicatorBottomInsetRatio,
   }) {
     return CoverLayout(
       backgroundStyle: backgroundStyle ?? this.backgroundStyle,
@@ -182,6 +254,14 @@ class CoverLayout {
       screenshotHeightMinRatio:
           screenshotHeightMinRatio ?? this.screenshotHeightMinRatio,
       screenshotFitMode: screenshotFitMode ?? this.screenshotFitMode,
+      statusBarEnabled: statusBarEnabled ?? this.statusBarEnabled,
+      statusBarStyle: statusBarStyle ?? this.statusBarStyle,
+      statusBarBackgroundColor:
+          statusBarBackgroundColor ?? this.statusBarBackgroundColor,
+      statusBarForegroundColor:
+          statusBarForegroundColor ?? this.statusBarForegroundColor,
+      statusBarHeightRatio: statusBarHeightRatio ?? this.statusBarHeightRatio,
+      statusBarTimeText: statusBarTimeText ?? this.statusBarTimeText,
       screenshotTopOnlyRounded:
           screenshotTopOnlyRounded ?? this.screenshotTopOnlyRounded,
       deviceFrameEnabled: deviceFrameEnabled ?? this.deviceFrameEnabled,
@@ -192,6 +272,20 @@ class CoverLayout {
           deviceScreenInsetXRatio ?? this.deviceScreenInsetXRatio,
       deviceScreenInsetYRatio:
           deviceScreenInsetYRatio ?? this.deviceScreenInsetYRatio,
+      deviceIslandEnabled: deviceIslandEnabled ?? this.deviceIslandEnabled,
+      deviceIslandWidthRatio:
+          deviceIslandWidthRatio ?? this.deviceIslandWidthRatio,
+      deviceIslandHeightRatio:
+          deviceIslandHeightRatio ?? this.deviceIslandHeightRatio,
+      deviceIslandTopInsetRatio:
+          deviceIslandTopInsetRatio ?? this.deviceIslandTopInsetRatio,
+      homeIndicatorEnabled: homeIndicatorEnabled ?? this.homeIndicatorEnabled,
+      homeIndicatorWidthRatio:
+          homeIndicatorWidthRatio ?? this.homeIndicatorWidthRatio,
+      homeIndicatorHeightRatio:
+          homeIndicatorHeightRatio ?? this.homeIndicatorHeightRatio,
+      homeIndicatorBottomInsetRatio:
+          homeIndicatorBottomInsetRatio ?? this.homeIndicatorBottomInsetRatio,
     );
   }
 
@@ -211,34 +305,66 @@ class CoverLayout {
         other.screenshotBorderWidthRatio == screenshotBorderWidthRatio &&
         other.screenshotHeightMinRatio == screenshotHeightMinRatio &&
         other.screenshotFitMode == screenshotFitMode &&
+        other.statusBarEnabled == statusBarEnabled &&
+        other.statusBarStyle == statusBarStyle &&
+        other.statusBarBackgroundColor == statusBarBackgroundColor &&
+        other.statusBarForegroundColor == statusBarForegroundColor &&
+        other.statusBarHeightRatio == statusBarHeightRatio &&
+        other.statusBarTimeText == statusBarTimeText &&
         other.screenshotTopOnlyRounded == screenshotTopOnlyRounded &&
         other.deviceFrameEnabled == deviceFrameEnabled &&
         other.deviceFrameColor == deviceFrameColor &&
         other.deviceFrameThicknessRatio == deviceFrameThicknessRatio &&
         other.deviceScreenInsetXRatio == deviceScreenInsetXRatio &&
-        other.deviceScreenInsetYRatio == deviceScreenInsetYRatio;
+        other.deviceScreenInsetYRatio == deviceScreenInsetYRatio &&
+        other.deviceIslandEnabled == deviceIslandEnabled &&
+        other.deviceIslandWidthRatio == deviceIslandWidthRatio &&
+        other.deviceIslandHeightRatio == deviceIslandHeightRatio &&
+        other.deviceIslandTopInsetRatio == deviceIslandTopInsetRatio &&
+        other.homeIndicatorEnabled == homeIndicatorEnabled &&
+        other.homeIndicatorWidthRatio == homeIndicatorWidthRatio &&
+        other.homeIndicatorHeightRatio == homeIndicatorHeightRatio &&
+        other.homeIndicatorBottomInsetRatio == homeIndicatorBottomInsetRatio;
   }
 
   @override
   int get hashCode => Object.hash(
-    backgroundStyle,
-    showAmbientShapes,
-    topMarginRatio,
-    sideMarginRatio,
-    titleSubtitleSpacingRatio,
-    sectionGapRatio,
-    screenshotCornerRadiusRatio,
-    screenshotShadowDyRatio,
-    screenshotShadowBlurRatio,
-    screenshotBorderWidthRatio,
-    screenshotHeightMinRatio,
-    screenshotFitMode,
-    screenshotTopOnlyRounded,
-    deviceFrameEnabled,
-    deviceFrameColor,
-    deviceFrameThicknessRatio,
-    deviceScreenInsetXRatio,
-    deviceScreenInsetYRatio,
+    Object.hash(
+      backgroundStyle,
+      showAmbientShapes,
+      topMarginRatio,
+      sideMarginRatio,
+      titleSubtitleSpacingRatio,
+      sectionGapRatio,
+      screenshotCornerRadiusRatio,
+      screenshotShadowDyRatio,
+      screenshotShadowBlurRatio,
+      screenshotBorderWidthRatio,
+      screenshotHeightMinRatio,
+      screenshotFitMode,
+      statusBarEnabled,
+      statusBarStyle,
+      statusBarBackgroundColor,
+      statusBarForegroundColor,
+      statusBarHeightRatio,
+      statusBarTimeText,
+      screenshotTopOnlyRounded,
+    ),
+    Object.hash(
+      deviceFrameEnabled,
+      deviceFrameColor,
+      deviceFrameThicknessRatio,
+      deviceScreenInsetXRatio,
+      deviceScreenInsetYRatio,
+      deviceIslandEnabled,
+      deviceIslandWidthRatio,
+      deviceIslandHeightRatio,
+      deviceIslandTopInsetRatio,
+      homeIndicatorEnabled,
+      homeIndicatorWidthRatio,
+      homeIndicatorHeightRatio,
+      homeIndicatorBottomInsetRatio,
+    ),
   );
 }
 
@@ -258,12 +384,26 @@ class CoverLayoutPresets {
     screenshotBorderWidthRatio: 0.004,
     screenshotHeightMinRatio: 0.55,
     screenshotFitMode: ScreenshotFitMode.coverTopCenter,
+    statusBarEnabled: true,
+    statusBarStyle: CoverStatusBarStyle.ios,
+    statusBarBackgroundColor: Colors.white,
+    statusBarForegroundColor: Color(0xFF111111),
+    statusBarHeightRatio: 0.072,
+    statusBarTimeText: '9:41',
     screenshotTopOnlyRounded: false,
     deviceFrameEnabled: true,
     deviceFrameColor: Color(0xFF06070A),
     deviceFrameThicknessRatio: 0.024,
     deviceScreenInsetXRatio: 1.35,
     deviceScreenInsetYRatio: 1.45,
+    deviceIslandEnabled: true,
+    deviceIslandWidthRatio: 0.40,
+    deviceIslandHeightRatio: 0.048,
+    deviceIslandTopInsetRatio: 0.042,
+    homeIndicatorEnabled: true,
+    homeIndicatorWidthRatio: 0.24,
+    homeIndicatorHeightRatio: 0.011,
+    homeIndicatorBottomInsetRatio: 0.018,
   );
 
   static const List<CoverLayoutOption> options = [
