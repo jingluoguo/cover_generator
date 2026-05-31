@@ -198,7 +198,10 @@ class CoverRenderer {
           )
         : area;
 
-    final radius = innerRect.width * layout.screenshotCornerRadiusRatio;
+    final radius = math.max(
+      innerRect.width * layout.screenshotCornerRadiusRatio,
+      innerRect.width * 0.03,
+    );
     final rrect =
         layout.screenshotTopOnlyRounded
             ? RRect.fromRectAndCorners(
@@ -209,19 +212,12 @@ class CoverRenderer {
             : RRect.fromRectAndRadius(innerRect, Radius.circular(radius));
 
     if (layout.deviceFrameEnabled) {
-      final frameRadius = outerRect.width * (layout.screenshotCornerRadiusRatio + 0.01);
+      final frameRadius = radius + frameThickness * 1.6;
       final frameRRect = RRect.fromRectAndRadius(
         outerRect,
         Radius.circular(frameRadius),
       );
       canvas.drawRRect(frameRRect, Paint()..color = layout.deviceFrameColor);
-      canvas.drawRRect(
-        frameRRect.deflate(math.max(1.0, frameThickness * 0.18)),
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = math.max(1.0, frameThickness * 0.12)
-          ..color = Colors.white.withValues(alpha: 0.08),
-      );
     }
 
     canvas.drawRRect(
@@ -258,10 +254,10 @@ class CoverRenderer {
         dy = innerRect.top + (innerRect.height - drawH) / 2;
         break;
       case ScreenshotFitMode.coverTopCenter:
-        final scale = math.max(innerRect.width / imgW, innerRect.height / imgH);
-        drawW = imgW * scale;
+        final scale = innerRect.width / imgW;
+        drawW = innerRect.width;
         drawH = imgH * scale;
-        dx = innerRect.left + (innerRect.width - drawW) / 2;
+        dx = innerRect.left;
         dy = innerRect.top;
         break;
     }
@@ -274,13 +270,16 @@ class CoverRenderer {
     );
     canvas.restore();
 
-    canvas.drawRRect(
-      rrect,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = math.max(1.0, area.width * layout.screenshotBorderWidthRatio)
-        ..color = Colors.white.withValues(alpha: 0.22),
-    );
+    // No inner stroke for framed layout to avoid corner arc artifacts.
+    if (!layout.deviceFrameEnabled) {
+      canvas.drawRRect(
+        rrect,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = math.max(1.0, area.width * layout.screenshotBorderWidthRatio * 0.7)
+          ..color = Colors.white.withValues(alpha: 0.16),
+      );
+    }
   }
 
   static void _drawPlaceholder(Canvas canvas, Rect area, CoverLayout layout) {

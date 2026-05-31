@@ -55,23 +55,71 @@ enum CoverBackgroundStyle { gradient, softLight }
 enum ScreenshotFitMode { coverTopCenter, containTopCenter, containCenter }
 
 class CoverLayout {
+  /// 背景样式：`gradient` 为渐变背景，`softLight` 为浅色柔光背景。
   final CoverBackgroundStyle backgroundStyle;
+
+  /// 是否绘制背景装饰光斑。
+  /// true 更有氛围感，false 更干净极简。
   final bool showAmbientShapes;
+
+  /// 顶部留白比例（相对整张图高度）。
+  /// 值越大，标题区整体越往下。
   final double topMarginRatio;
+
+  /// 左右外边距比例（相对整张图宽度）。
+  /// 值越大，手机壳离画布左右边更远。
   final double sideMarginRatio;
+
+  /// 标题与副标题之间的垂直间距比例（相对整张图高度）。
   final double titleSubtitleSpacingRatio;
+
+  /// 各主要区块（标题区/截图区/底部文案）之间的间距比例。
   final double sectionGapRatio;
+
+  /// 截图内容圆角比例（相对截图区域宽度）。
+  /// 值越大，圆角越明显。
   final double screenshotCornerRadiusRatio;
+
+  /// 截图阴影的垂直偏移比例（相对截图区域高度）。
   final double screenshotShadowDyRatio;
+
+  /// 截图阴影模糊半径比例（相对截图区域宽度）。
   final double screenshotShadowBlurRatio;
+
+  /// 截图描边粗细比例（相对截图区域宽度）。
+  /// 为 0 可关闭描边视觉。
   final double screenshotBorderWidthRatio;
+
+  /// 截图区域最小高度比例（相对整张图高度）。
+  /// 防止标题过长时截图区域被挤得过小。
   final double screenshotHeightMinRatio;
+
+  /// 截图适配模式：
+  /// - `coverTopCenter`: 按宽度铺满并顶部居中（优先显示顶部）
+  /// - `containTopCenter`: 完整显示并顶部居中
+  /// - `containCenter`: 完整显示并居中
   final ScreenshotFitMode screenshotFitMode;
+
+  /// 是否仅保留顶部圆角。
+  /// true 适合“上圆下直”海报风格，false 为四角统一圆角。
   final bool screenshotTopOnlyRounded;
+
+  /// 是否启用外层设备黑色边框（手机壳效果）。
   final bool deviceFrameEnabled;
+
+  /// 设备边框颜色。
   final Color deviceFrameColor;
+
+  /// 设备边框厚度比例（相对截图区域宽度）。
+  /// 值越大，黑边越厚。
   final double deviceFrameThicknessRatio;
+
+  /// 屏幕内容相对边框的横向内缩系数（基于边框厚度）。
+  /// 值越大，截图离左右黑边越远。
   final double deviceScreenInsetXRatio;
+
+  /// 屏幕内容相对边框的纵向内缩系数（基于边框厚度）。
+  /// 值越大，截图离上下黑边越远。
   final double deviceScreenInsetYRatio;
 
   const CoverLayout({
@@ -201,21 +249,21 @@ class CoverLayoutPresets {
     backgroundStyle: CoverBackgroundStyle.softLight,
     showAmbientShapes: false,
     topMarginRatio: 0.07,
-    sideMarginRatio: 0.06,
+    sideMarginRatio: 0.08,
     titleSubtitleSpacingRatio: 0.012,
     sectionGapRatio: 0.028,
-    screenshotCornerRadiusRatio: 0.08,
+    screenshotCornerRadiusRatio: 0.125,
     screenshotShadowDyRatio: 0.01,
     screenshotShadowBlurRatio: 0.03,
     screenshotBorderWidthRatio: 0.004,
     screenshotHeightMinRatio: 0.55,
-    screenshotFitMode: ScreenshotFitMode.containCenter,
+    screenshotFitMode: ScreenshotFitMode.coverTopCenter,
     screenshotTopOnlyRounded: false,
     deviceFrameEnabled: true,
     deviceFrameColor: Color(0xFF06070A),
-    deviceFrameThicknessRatio: 0.02,
-    deviceScreenInsetXRatio: 0.02,
-    deviceScreenInsetYRatio: 2.8,
+    deviceFrameThicknessRatio: 0.024,
+    deviceScreenInsetXRatio: 1.35,
+    deviceScreenInsetYRatio: 1.75,
   );
 
   static const List<CoverLayoutOption> options = [

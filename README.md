@@ -45,7 +45,7 @@ CoverCaptureWrapper(
   statusBarStyle: StatusBarStyle.ios,
   statusBarColor: Colors.black,
   statusBarTextColor: Colors.white,
-  initialLayout: CoverLayoutPresets.editorialLightPhone, // 初始风格
+  initialLayout: CoverLayoutPresets.iphoneRealistic, // 初始风格（真机风）
   enableLayoutSelector: true, // 配置页是否允许切换风格
   // layoutOptions: CoverLayoutPresets.options, // 可传入自定义风格列表
   child: YourContentWidget(),
@@ -69,7 +69,7 @@ Navigator.of(context).push(
 );
 
 // 可选：默认使用“轻杂志风”模板
-controller.updateLayout(CoverLayoutPresets.editorialLightPhone);
+controller.updateLayout(CoverLayoutPresets.iphoneRealistic);
 ```
 
 ### 方式三：仅用渲染引擎
