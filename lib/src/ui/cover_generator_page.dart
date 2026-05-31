@@ -59,6 +59,11 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
     if (mounted) setState(() {});
   }
 
+  void _updateLayout(CoverLayout layout) {
+    c.updateLayout(layout);
+    c.generate();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,6 +121,8 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
                     _buildLayoutSection(),
                     const SizedBox(height: 20),
                   ],
+                  _buildLayoutEditorSection(),
+                  const SizedBox(height: 20),
                   GradientColorPicker(
                     startColor: c.startColor,
                     endColor: c.endColor,
@@ -199,7 +206,7 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
           children: [
             for (var i = 0; i < options.length; i++)
               GestureDetector(
-                onTap: () => c.updateLayout(options[i].layout),
+                onTap: () => _updateLayout(options[i].layout),
                 child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -222,6 +229,302 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildLayoutEditorSection() {
+    final layout = c.layout;
+    return ExpansionTile(
+      tilePadding: EdgeInsets.zero,
+      childrenPadding: const EdgeInsets.only(bottom: 4),
+      title: const Text(
+        '布局参数',
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+        ),
+      ),
+      subtitle: const Text(
+        '直接调 CoverLayout 并实时预览',
+        style: TextStyle(fontSize: 12, color: Colors.black45),
+      ),
+      children: [
+        _buildEnumDropdown<CoverBackgroundStyle>(
+          label: '背景样式',
+          value: layout.backgroundStyle,
+          values: CoverBackgroundStyle.values,
+          labelBuilder: (v) => switch (v) {
+            CoverBackgroundStyle.gradient => '渐变背景',
+            CoverBackgroundStyle.softLight => '浅色柔光',
+          },
+          onChanged: (v) => _updateLayout(layout.copyWith(backgroundStyle: v)),
+        ),
+        _buildEnumDropdown<ScreenshotFitMode>(
+          label: '截图适配',
+          value: layout.screenshotFitMode,
+          values: ScreenshotFitMode.values,
+          labelBuilder: (v) => switch (v) {
+            ScreenshotFitMode.coverTopCenter => '宽铺满 顶部优先',
+            ScreenshotFitMode.containTopCenter => '完整显示 顶部优先',
+            ScreenshotFitMode.containCenter => '完整显示 居中',
+          },
+          onChanged: (v) => _updateLayout(layout.copyWith(screenshotFitMode: v)),
+        ),
+        _buildSwitchRow(
+          label: '背景光斑',
+          value: layout.showAmbientShapes,
+          onChanged: (v) => _updateLayout(layout.copyWith(showAmbientShapes: v)),
+        ),
+        _buildSwitchRow(
+          label: '仅顶部圆角',
+          value: layout.screenshotTopOnlyRounded,
+          onChanged: (v) => _updateLayout(layout.copyWith(screenshotTopOnlyRounded: v)),
+        ),
+        _buildSwitchRow(
+          label: '启用手机壳',
+          value: layout.deviceFrameEnabled,
+          onChanged: (v) => _updateLayout(layout.copyWith(deviceFrameEnabled: v)),
+        ),
+        _buildSliderRow(
+          label: '顶部留白',
+          value: layout.topMarginRatio,
+          min: 0.0,
+          max: 0.2,
+          onChanged: (v) => _updateLayout(layout.copyWith(topMarginRatio: v)),
+        ),
+        _buildSliderRow(
+          label: '左右外边距',
+          value: layout.sideMarginRatio,
+          min: 0.0,
+          max: 0.16,
+          onChanged: (v) => _updateLayout(layout.copyWith(sideMarginRatio: v)),
+        ),
+        _buildSliderRow(
+          label: '标题副标题间距',
+          value: layout.titleSubtitleSpacingRatio,
+          min: 0.0,
+          max: 0.04,
+          onChanged: (v) => _updateLayout(layout.copyWith(titleSubtitleSpacingRatio: v)),
+        ),
+        _buildSliderRow(
+          label: '区块间距',
+          value: layout.sectionGapRatio,
+          min: 0.0,
+          max: 0.06,
+          onChanged: (v) => _updateLayout(layout.copyWith(sectionGapRatio: v)),
+        ),
+        _buildSliderRow(
+          label: '截图圆角',
+          value: layout.screenshotCornerRadiusRatio,
+          min: 0.0,
+          max: 0.2,
+          onChanged: (v) => _updateLayout(layout.copyWith(screenshotCornerRadiusRatio: v)),
+        ),
+        _buildSliderRow(
+          label: '阴影偏移',
+          value: layout.screenshotShadowDyRatio,
+          min: 0.0,
+          max: 0.04,
+          onChanged: (v) => _updateLayout(layout.copyWith(screenshotShadowDyRatio: v)),
+        ),
+        _buildSliderRow(
+          label: '阴影模糊',
+          value: layout.screenshotShadowBlurRatio,
+          min: 0.0,
+          max: 0.08,
+          onChanged: (v) => _updateLayout(layout.copyWith(screenshotShadowBlurRatio: v)),
+        ),
+        _buildSliderRow(
+          label: '截图描边',
+          value: layout.screenshotBorderWidthRatio,
+          min: 0.0,
+          max: 0.02,
+          onChanged: (v) => _updateLayout(layout.copyWith(screenshotBorderWidthRatio: v)),
+        ),
+        _buildSliderRow(
+          label: '截图最小高度',
+          value: layout.screenshotHeightMinRatio,
+          min: 0.2,
+          max: 0.8,
+          onChanged: (v) => _updateLayout(layout.copyWith(screenshotHeightMinRatio: v)),
+        ),
+        _buildSliderRow(
+          label: '边框厚度',
+          value: layout.deviceFrameThicknessRatio,
+          min: 0.0,
+          max: 0.08,
+          onChanged: (v) => _updateLayout(layout.copyWith(deviceFrameThicknessRatio: v)),
+        ),
+        _buildSliderRow(
+          label: '屏幕左右内缩',
+          value: layout.deviceScreenInsetXRatio,
+          min: 0.0,
+          max: 3.0,
+          onChanged: (v) => _updateLayout(layout.copyWith(deviceScreenInsetXRatio: v)),
+        ),
+        _buildSliderRow(
+          label: '屏幕上下内缩',
+          value: layout.deviceScreenInsetYRatio,
+          min: 0.0,
+          max: 4.0,
+          onChanged: (v) => _updateLayout(layout.copyWith(deviceScreenInsetYRatio: v)),
+        ),
+        _buildFrameColorSection(layout),
+      ],
+    );
+  }
+
+  Widget _buildFrameColorSection(CoverLayout layout) {
+    const colors = [
+      Color(0xFF06070A),
+      Color(0xFF101114),
+      Color(0xFF1D1F24),
+      Color(0xFFE9EDF2),
+      Color(0xFFBFC7D1),
+    ];
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '边框颜色',
+            style: TextStyle(fontSize: 12, color: Colors.black54),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              for (final color in colors)
+                GestureDetector(
+                  onTap: () => _updateLayout(layout.copyWith(deviceFrameColor: color)),
+                  child: Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: layout.deviceFrameColor == color
+                            ? const Color(0xFF667eea)
+                            : Colors.black12,
+                        width: layout.deviceFrameColor == color ? 2 : 1,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSwitchRow({
+    required String label,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 13, color: Colors.black87),
+            ),
+          ),
+          Switch.adaptive(value: value, onChanged: onChanged),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSliderRow({
+    required String label,
+    required double value,
+    required double min,
+    required double max,
+    required ValueChanged<double> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: const TextStyle(fontSize: 12, color: Colors.black54),
+                ),
+              ),
+              Text(
+                value.toStringAsFixed(3),
+                style: const TextStyle(fontSize: 12, color: Colors.black45),
+              ),
+            ],
+          ),
+          Slider(
+            value: value.clamp(min, max),
+            min: min,
+            max: max,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEnumDropdown<T>({
+    required String label,
+    required T value,
+    required List<T> values,
+    required String Function(T) labelBuilder,
+    required ValueChanged<T> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: 12, color: Colors.black54),
+          ),
+          const SizedBox(height: 6),
+          DropdownButtonFormField<T>(
+            initialValue: value,
+            decoration: InputDecoration(
+              isDense: true,
+              filled: true,
+              fillColor: Colors.grey.withValues(alpha: 0.06),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.15)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.15)),
+              ),
+            ),
+            items: [
+              for (final item in values)
+                DropdownMenuItem<T>(
+                  value: item,
+                  child: Text(labelBuilder(item)),
+                ),
+            ],
+            onChanged: (next) {
+              if (next != null) onChanged(next);
+            },
+          ),
+        ],
+      ),
     );
   }
 
