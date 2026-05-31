@@ -29,6 +29,7 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
   late final TextEditingController _titleCtrl;
   late final TextEditingController _subtitleCtrl;
   late final TextEditingController _footerCtrl;
+  final Map<String, double> _pendingSliderValues = {};
 
   CoverGeneratorController get c => widget.controller;
 
@@ -62,6 +63,14 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
   void _updateLayout(CoverLayout layout) {
     c.updateLayout(layout);
     c.generate();
+  }
+
+  void _resetLayoutToDefault() {
+    final defaultLayout = widget.layoutOptions.isNotEmpty
+        ? widget.layoutOptions.first.layout
+        : CoverLayoutPresets.classicGradient;
+    setState(() => _pendingSliderValues.clear());
+    _updateLayout(defaultLayout);
   }
 
   @override
@@ -246,8 +255,12 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
         ),
       ),
       subtitle: const Text(
-        '直接调 CoverLayout 并实时预览',
+        '直接调 CoverLayout（滑动结束后预览更新）',
         style: TextStyle(fontSize: 12, color: Colors.black45),
+      ),
+      trailing: TextButton(
+        onPressed: _resetLayoutToDefault,
+        child: const Text('恢复默认'),
       ),
       children: [
         _buildEnumDropdown<CoverBackgroundStyle>(
@@ -524,6 +537,7 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
     required double max,
     required ValueChanged<double> onChanged,
   }) {
+    final sliderValue = (_pendingSliderValues[label] ?? value).clamp(min, max);
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Column(
@@ -538,16 +552,22 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
                 ),
               ),
               Text(
-                value.toStringAsFixed(3),
+                sliderValue.toStringAsFixed(3),
                 style: const TextStyle(fontSize: 12, color: Colors.black45),
               ),
             ],
           ),
           Slider(
-            value: value.clamp(min, max),
+            value: sliderValue,
             min: min,
             max: max,
-            onChanged: onChanged,
+            onChanged: (next) {
+              setState(() => _pendingSliderValues[label] = next);
+            },
+            onChangeEnd: (next) {
+              setState(() => _pendingSliderValues.remove(label));
+              onChanged(next);
+            },
           ),
         ],
       ),
