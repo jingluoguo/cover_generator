@@ -112,15 +112,15 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
   }
 
   Future<void> _saveCurrentLayout() async {
-    final nameController = TextEditingController();
+    var draftName = '';
     final name = await showDialog<String>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('保存布局配置'),
           content: TextField(
-            controller: nameController,
             autofocus: true,
+            onChanged: (value) => draftName = value,
             decoration: const InputDecoration(
               hintText: '例如：我的首发海报',
             ),
@@ -132,7 +132,7 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
             ),
             TextButton(
               onPressed: () {
-                final text = nameController.text.trim();
+                final text = draftName.trim();
                 if (text.isEmpty) return;
                 Navigator.of(dialogContext).pop(text);
               },
@@ -142,7 +142,6 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
         );
       },
     );
-    nameController.dispose();
     if (name == null || name.isEmpty) return;
 
     final id = 'saved_${DateTime.now().millisecondsSinceEpoch}';
