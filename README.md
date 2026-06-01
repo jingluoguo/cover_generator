@@ -162,17 +162,20 @@ lib/
 ```xml
 <key>NSPhotoLibraryUsageDescription</key>
 <string>需要访问相册以选择截图</string>
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>需要保存封面图到系统相册</string>
 ```
 
 ### Android
 
-无需额外配置。`share_plus` v7+ 和 `image_picker` 已自动处理权限和文件共享。
+Android 10+ 通常可直接保存到系统相册；如你的宿主项目有权限拦截逻辑，请确保已授予图片/媒体写入权限。
 
 ## 📝 依赖
 
 | 包             | 用途           |
 | -------------- | -------------- |
 | `flutter`      | UI 框架        |
+| `image_gallery_saver_plus` | 保存图片到系统相册 |
 | `image_picker` | 从相册选择截图 |
 | `share_plus`   | 分享生成的图片 |
 

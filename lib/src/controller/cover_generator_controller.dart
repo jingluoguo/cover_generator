@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -202,6 +203,20 @@ class CoverGeneratorController extends ChangeNotifier {
       [XFile(file.path, mimeType: 'image/png')],
       text: title,
     );
+  }
+
+  Future<bool> saveImage() async {
+    final bytes = generatedBytes;
+    if (bytes == null) return false;
+
+    final name = 'cover_${DateTime.now().millisecondsSinceEpoch}';
+    final result = await ImageGallerySaverPlus.saveImage(
+      bytes,
+      quality: 100,
+      name: name,
+    );
+    final ok = result['isSuccess'] == true || result['success'] == true;
+    return ok;
   }
 
   CoverConfig buildConfig() {

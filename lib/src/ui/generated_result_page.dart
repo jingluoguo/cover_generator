@@ -14,6 +14,7 @@ class GeneratedResultPage extends StatefulWidget {
 
 class _GeneratedResultPageState extends State<GeneratedResultPage> {
   CoverGeneratorController get c => widget.controller;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -29,6 +30,31 @@ class _GeneratedResultPageState extends State<GeneratedResultPage> {
 
   void _onUpdate() {
     if (mounted) setState(() {});
+  }
+
+  Future<void> _onSave() async {
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
+    try {
+      final saved = await c.saveImage();
+      if (!mounted) return;
+      if (!saved) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('保存失败')));
+        return;
+      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('已保存到系统相册')));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('保存失败')));
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
   }
 
   @override
@@ -107,8 +133,8 @@ class _GeneratedResultPageState extends State<GeneratedResultPage> {
                   Expanded(
                     child: _actionButton(
                       icon: Icons.save_alt_rounded,
-                      label: '保存',
-                      onTap: c.shareImage,
+                      label: _isSaving ? '保存中...' : '保存',
+                      onTap: _onSave,
                       filled: true,
                     ),
                   ),
