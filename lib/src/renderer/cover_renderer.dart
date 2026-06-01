@@ -32,14 +32,13 @@ class CoverRenderer {
     final subtitleFontSize = baseSize * 0.03;
     final titleContentWidth = w - sideMargin * 2;
 
-    final titleColor =
-        layout.backgroundStyle == CoverBackgroundStyle.softLight
-            ? const Color(0xFF111111)
-            : Colors.white;
+    final titleColor = layout.backgroundStyle == CoverBackgroundStyle.softLight
+        ? const Color(0xFF111111)
+        : Colors.white;
     final subtitleColor =
         layout.backgroundStyle == CoverBackgroundStyle.softLight
-            ? const Color(0xFF6F747C)
-            : Colors.white.withValues(alpha: 0.85);
+        ? const Color(0xFF6F747C)
+        : Colors.white.withValues(alpha: 0.85);
 
     final titleParagraph = _buildParagraph(
       text: config.title,
@@ -68,9 +67,12 @@ class CoverRenderer {
     );
 
     final titleHeight = titleParagraph.height;
-    final subtitleHeight = config.subtitle.isNotEmpty ? subtitleParagraph.height : 0;
-    final titleSpacing =
-        config.subtitle.isNotEmpty ? h * layout.titleSubtitleSpacingRatio : 0.0;
+    final subtitleHeight = config.subtitle.isNotEmpty
+        ? subtitleParagraph.height
+        : 0;
+    final titleSpacing = config.subtitle.isNotEmpty
+        ? h * layout.titleSubtitleSpacingRatio
+        : 0.0;
     final titleAreaHeight = titleHeight + subtitleHeight + titleSpacing;
 
     final footerFontSize = w * 0.025;
@@ -142,14 +144,10 @@ class CoverRenderer {
       canvas.drawRect(
         rect,
         Paint()
-          ..shader = ui.Gradient.radial(
-            Offset(w * 0.5, h * 0.3),
-            w * 0.95,
-            [
-              Colors.white.withValues(alpha: 0.86),
-              const Color(0xFFE4EBF0).withValues(alpha: 0.92),
-            ],
-          ),
+          ..shader = ui.Gradient.radial(Offset(w * 0.5, h * 0.3), w * 0.95, [
+            Colors.white.withValues(alpha: 0.86),
+            const Color(0xFFE4EBF0).withValues(alpha: 0.92),
+          ]),
       );
       return;
     }
@@ -190,8 +188,9 @@ class CoverRenderer {
     Rect area,
     CoverLayout layout,
   ) {
-    final frameThickness =
-        layout.deviceFrameEnabled ? area.width * layout.deviceFrameThicknessRatio : 0.0;
+    final frameThickness = layout.deviceFrameEnabled
+        ? area.width * layout.deviceFrameThicknessRatio
+        : 0.0;
     final insetX = frameThickness * layout.deviceScreenInsetXRatio;
     final insetY = frameThickness * layout.deviceScreenInsetYRatio;
     final outerRect = area;
@@ -208,14 +207,13 @@ class CoverRenderer {
       innerRect.width * layout.screenshotCornerRadiusRatio,
       innerRect.width * 0.03,
     );
-    final rrect =
-        layout.screenshotTopOnlyRounded
-            ? RRect.fromRectAndCorners(
-              innerRect,
-              topLeft: Radius.circular(radius),
-              topRight: Radius.circular(radius),
-            )
-            : RRect.fromRectAndRadius(innerRect, Radius.circular(radius));
+    final rrect = layout.screenshotTopOnlyRounded
+        ? RRect.fromRectAndCorners(
+            innerRect,
+            topLeft: Radius.circular(radius),
+            topRight: Radius.circular(radius),
+          )
+        : RRect.fromRectAndRadius(innerRect, Radius.circular(radius));
 
     if (layout.deviceFrameEnabled) {
       final frameRadius = radius + frameThickness * 1.6;
@@ -230,8 +228,10 @@ class CoverRenderer {
       rrect.shift(Offset(0, area.height * layout.screenshotShadowDyRatio)),
       Paint()
         ..color = Colors.black.withValues(alpha: 0.25)
-        ..maskFilter =
-            MaskFilter.blur(BlurStyle.normal, area.width * layout.screenshotShadowBlurRatio),
+        ..maskFilter = MaskFilter.blur(
+          BlurStyle.normal,
+          area.width * layout.screenshotShadowBlurRatio,
+        ),
     );
 
     canvas.save();
@@ -275,9 +275,9 @@ class CoverRenderer {
       Paint()..filterQuality = FilterQuality.high,
     );
 
-    if (
-        layout.deviceIslandEnabled &&
-        !(layout.statusBarEnabled && layout.statusBarStyle == CoverStatusBarStyle.ios)) {
+    if (layout.deviceIslandEnabled &&
+        !(layout.statusBarEnabled &&
+            layout.statusBarStyle == CoverStatusBarStyle.ios)) {
       _drawDeviceIsland(canvas, innerRect, layout);
     }
 
@@ -297,7 +297,10 @@ class CoverRenderer {
         rrect,
         Paint()
           ..style = PaintingStyle.stroke
-          ..strokeWidth = math.max(1.0, area.width * layout.screenshotBorderWidthRatio * 0.7)
+          ..strokeWidth = math.max(
+            1.0,
+            area.width * layout.screenshotBorderWidthRatio * 0.7,
+          )
           ..color = Colors.white.withValues(alpha: 0.16),
       );
     }
@@ -307,12 +310,18 @@ class CoverRenderer {
     final borderRadius = area.width * layout.screenshotCornerRadiusRatio;
     final rrect = RRect.fromRectAndRadius(area, Radius.circular(borderRadius));
 
-    canvas.drawRRect(rrect, Paint()..color = Colors.white.withValues(alpha: 0.1));
+    canvas.drawRRect(
+      rrect,
+      Paint()..color = Colors.white.withValues(alpha: 0.1),
+    );
     canvas.drawRRect(
       rrect,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = math.max(1.0, area.width * layout.screenshotBorderWidthRatio)
+        ..strokeWidth = math.max(
+          1.0,
+          area.width * layout.screenshotBorderWidthRatio,
+        )
         ..color = Colors.white.withValues(alpha: 0.2),
     );
 
@@ -377,10 +386,7 @@ class CoverRenderer {
         layout.statusBarTimeText,
       );
     } else {
-      canvas.drawRect(
-        rect,
-        Paint()..color = layout.statusBarBackgroundColor,
-      );
+      canvas.drawRect(rect, Paint()..color = layout.statusBarBackgroundColor);
       _drawAndroidStatusBar(
         canvas,
         rect,
@@ -401,7 +407,8 @@ class CoverRenderer {
     final statusHeight = rect.height;
     final width = rect.width;
     final iconSize = statusHeight * 0.40;
-    final centerY = screenRect.top + screenRect.height * layout.deviceIslandTopInsetRatio;
+    final centerY =
+        screenRect.top + screenRect.height * layout.deviceIslandTopInsetRatio;
     final leftPadding = math.max(24.0, width * 0.055);
     final rightPadding = math.max(20.0, width * 0.05);
     final islandWidth = screenRect.width * layout.deviceIslandWidthRatio;
@@ -429,10 +436,7 @@ class CoverRenderer {
         height: islandHeight,
       );
       canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          islandRect,
-          Radius.circular(islandHeight / 2),
-        ),
+        RRect.fromRectAndRadius(islandRect, Radius.circular(islandHeight / 2)),
         Paint()..color = const Color(0xFF05070B),
       );
     }
@@ -484,7 +488,12 @@ class CoverRenderer {
     );
 
     final wifiRight = batteryLeft - iconSize * 1.15;
-    _drawWifiIcon(canvas, Offset(wifiRight, centerY), iconSize * 1.05, iconColor);
+    _drawWifiIcon(
+      canvas,
+      Offset(wifiRight, centerY),
+      iconSize * 1.05,
+      iconColor,
+    );
   }
 
   static void _drawAndroidStatusBar(
@@ -552,7 +561,12 @@ class CoverRenderer {
     );
 
     final wifiRight = batteryLeft - 14;
-    _drawWifiIcon(canvas, Offset(wifiRight, centerY), iconSize * 1.1, iconColor);
+    _drawWifiIcon(
+      canvas,
+      Offset(wifiRight, centerY),
+      iconSize * 1.1,
+      iconColor,
+    );
   }
 
   static void _drawWifiIcon(
@@ -594,7 +608,8 @@ class CoverRenderer {
     final indicatorWidth = screenRect.width * layout.homeIndicatorWidthRatio;
     final indicatorHeight = screenRect.height * layout.homeIndicatorHeightRatio;
     final indicatorBottom =
-        screenRect.bottom - screenRect.height * layout.homeIndicatorBottomInsetRatio;
+        screenRect.bottom -
+        screenRect.height * layout.homeIndicatorBottomInsetRatio;
     final indicatorRect = Rect.fromCenter(
       center: Offset(
         screenRect.center.dx,
@@ -664,26 +679,26 @@ class CoverRenderer {
     final resolvedFontFamily =
         _resolveFontFamily(fontFamily: fontFamily, fontPackage: fontPackage) ??
         _defaultFontFamily;
-    final builder = ui.ParagraphBuilder(
-      ui.ParagraphStyle(
-        fontFamily: resolvedFontFamily,
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        maxLines: maxLines,
-        textAlign: textAlign,
-        height: lineHeight,
-      ),
-    )..pushStyle(
-      ui.TextStyle(
-        color: color,
-        fontFamily: resolvedFontFamily,
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-      ),
-    );
+    final builder =
+        ui.ParagraphBuilder(
+          ui.ParagraphStyle(
+            fontFamily: resolvedFontFamily,
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+            maxLines: maxLines,
+            textAlign: textAlign,
+            height: lineHeight,
+          ),
+        )..pushStyle(
+          ui.TextStyle(
+            color: color,
+            fontFamily: resolvedFontFamily,
+            fontSize: fontSize,
+            fontWeight: fontWeight,
+          ),
+        );
     builder.addText(text);
-    return builder.build()
-      ..layout(ui.ParagraphConstraints(width: width));
+    return builder.build()..layout(ui.ParagraphConstraints(width: width));
   }
 
   static String? _resolveFontFamily({

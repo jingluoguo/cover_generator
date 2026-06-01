@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../controller/cover_generator_controller.dart';
 import '../models/cover_config.dart';
@@ -26,10 +28,12 @@ class CoverGeneratorPage extends StatefulWidget {
 }
 
 class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
+  static const String _savedLayoutKey = 'cover_generator_saved_layouts_v1';
   late final TextEditingController _titleCtrl;
   late final TextEditingController _subtitleCtrl;
   late final TextEditingController _footerCtrl;
   final Map<String, double> _pendingSliderValues = {};
+  List<CoverLayoutOption> _savedLayoutOptions = [];
 
   CoverGeneratorController get c => widget.controller;
 
@@ -43,6 +47,7 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
     _footerCtrl = TextEditingController(text: c.footerText)
       ..addListener(() => c.footerText = _footerCtrl.text);
     c.addListener(_onControllerUpdate);
+    _loadSavedLayouts();
     // Auto-generate preview on page load
     WidgetsBinding.instance.addPostFrameCallback((_) => c.generate());
   }
@@ -65,12 +70,104 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
     c.generate();
   }
 
+  List<CoverLayoutOption> get _allLayoutOptions => [
+    ...widget.layoutOptions,
+    ..._savedLayoutOptions,
+  ];
+
   void _resetLayoutToDefault() {
     final defaultLayout = widget.layoutOptions.isNotEmpty
         ? widget.layoutOptions.first.layout
         : CoverLayoutPresets.classicGradient;
     setState(() => _pendingSliderValues.clear());
     _updateLayout(defaultLayout);
+  }
+
+  Future<void> _loadSavedLayouts() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getStringList(_savedLayoutKey) ?? const [];
+    final loaded = <CoverLayoutOption>[];
+    for (final item in raw) {
+      try {
+        final json = jsonDecode(item) as Map<String, dynamic>;
+        final id = json['id']?.toString() ?? '';
+        final label = json['label']?.toString() ?? '';
+        final layoutJson = json['layout'];
+        if (id.isEmpty || label.isEmpty || layoutJson is! Map<String, dynamic>) {
+          continue;
+        }
+        loaded.add(
+          CoverLayoutOption(
+            id: id,
+            label: label,
+            layout: CoverLayout.fromJson(layoutJson),
+          ),
+        );
+      } catch (_) {
+        // Ignore broken saved data.
+      }
+    }
+    if (!mounted) return;
+    setState(() => _savedLayoutOptions = loaded);
+  }
+
+  Future<void> _saveCurrentLayout() async {
+    final nameController = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('保存布局配置'),
+          content: TextField(
+            controller: nameController,
+            autofocus: true,
+            decoration: const InputDecoration(
+              hintText: '例如：我的首发海报',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () {
+                final text = nameController.text.trim();
+                if (text.isEmpty) return;
+                Navigator.of(dialogContext).pop(text);
+              },
+              child: const Text('保存'),
+            ),
+          ],
+        );
+      },
+    );
+    nameController.dispose();
+    if (name == null || name.isEmpty) return;
+
+    final id = 'saved_${DateTime.now().millisecondsSinceEpoch}';
+    final newItem = CoverLayoutOption(
+      id: id,
+      label: name,
+      layout: c.layout,
+    );
+    final updated = [..._savedLayoutOptions, newItem];
+
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = updated
+        .map((e) => jsonEncode({
+              'id': e.id,
+              'label': e.label,
+              'layout': e.layout.toJson(),
+            }))
+        .toList();
+    await prefs.setStringList(_savedLayoutKey, encoded);
+
+    if (!mounted) return;
+    setState(() => _savedLayoutOptions = updated);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('已保存配置：$name')),
+    );
   }
 
   @override
@@ -194,7 +291,7 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
   }
 
   Widget _buildLayoutSection() {
-    final options = widget.layoutOptions;
+    final options = _allLayoutOptions;
     final selectedIndex = options.indexWhere((o) => o.layout == c.layout);
 
     return Column(
@@ -208,6 +305,13 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
             color: Colors.black87,
           ),
         ),
+        if (_savedLayoutOptions.isNotEmpty) ...[
+          const SizedBox(height: 6),
+          Text(
+            '已保存 ${_savedLayoutOptions.length} 个自定义配置',
+            style: const TextStyle(fontSize: 11, color: Colors.black45),
+          ),
+        ],
         const SizedBox(height: 10),
         Wrap(
           spacing: 10,
@@ -263,6 +367,17 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
         child: const Text('恢复默认'),
       ),
       children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
+              onPressed: _saveCurrentLayout,
+              icon: const Icon(Icons.bookmark_add_outlined, size: 18),
+              label: const Text('保存当前配置'),
+            ),
+          ),
+        ),
         _buildEnumDropdown<CoverBackgroundStyle>(
           label: '背景样式',
           value: layout.backgroundStyle,

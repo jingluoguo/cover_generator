@@ -309,6 +309,126 @@ class CoverLayout {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'backgroundStyle': backgroundStyle.name,
+      'showAmbientShapes': showAmbientShapes,
+      'topMarginRatio': topMarginRatio,
+      'sideMarginRatio': sideMarginRatio,
+      'titleSubtitleSpacingRatio': titleSubtitleSpacingRatio,
+      'sectionGapRatio': sectionGapRatio,
+      'screenshotCornerRadiusRatio': screenshotCornerRadiusRatio,
+      'screenshotShadowDyRatio': screenshotShadowDyRatio,
+      'screenshotShadowBlurRatio': screenshotShadowBlurRatio,
+      'screenshotBorderWidthRatio': screenshotBorderWidthRatio,
+      'screenshotHeightMinRatio': screenshotHeightMinRatio,
+      'screenshotFitMode': screenshotFitMode.name,
+      'statusBarEnabled': statusBarEnabled,
+      'statusBarStyle': statusBarStyle.name,
+      'statusBarBackgroundColor': statusBarBackgroundColor.toARGB32(),
+      'statusBarForegroundColor': statusBarForegroundColor.toARGB32(),
+      'statusBarHeightRatio': statusBarHeightRatio,
+      'statusBarTimeText': statusBarTimeText,
+      'screenshotTopOnlyRounded': screenshotTopOnlyRounded,
+      'deviceFrameEnabled': deviceFrameEnabled,
+      'deviceFrameColor': deviceFrameColor.toARGB32(),
+      'deviceFrameThicknessRatio': deviceFrameThicknessRatio,
+      'deviceScreenInsetXRatio': deviceScreenInsetXRatio,
+      'deviceScreenInsetYRatio': deviceScreenInsetYRatio,
+      'deviceIslandEnabled': deviceIslandEnabled,
+      'deviceIslandWidthRatio': deviceIslandWidthRatio,
+      'deviceIslandHeightRatio': deviceIslandHeightRatio,
+      'deviceIslandTopInsetRatio': deviceIslandTopInsetRatio,
+      'homeIndicatorEnabled': homeIndicatorEnabled,
+      'homeIndicatorWidthRatio': homeIndicatorWidthRatio,
+      'homeIndicatorHeightRatio': homeIndicatorHeightRatio,
+      'homeIndicatorBottomInsetRatio': homeIndicatorBottomInsetRatio,
+    };
+  }
+
+  factory CoverLayout.fromJson(Map<String, dynamic> json) {
+    T parseEnumByName<T extends Enum>(List<T> values, dynamic raw, T fallback) {
+      final value = raw?.toString();
+      for (final item in values) {
+        if (item.name == value) return item;
+      }
+      return fallback;
+    }
+
+    double asDouble(dynamic value, double fallback) {
+      if (value is num) return value.toDouble();
+      return fallback;
+    }
+
+    bool asBool(dynamic value, bool fallback) {
+      if (value is bool) return value;
+      return fallback;
+    }
+
+    int asInt(dynamic value, int fallback) {
+      if (value is int) return value;
+      return fallback;
+    }
+
+    String asString(dynamic value, String fallback) {
+      if (value is String && value.isNotEmpty) return value;
+      return fallback;
+    }
+
+    return CoverLayout(
+      backgroundStyle: parseEnumByName(
+        CoverBackgroundStyle.values,
+        json['backgroundStyle'],
+        CoverBackgroundStyle.gradient,
+      ),
+      showAmbientShapes: asBool(json['showAmbientShapes'], true),
+      topMarginRatio: asDouble(json['topMarginRatio'], 0.04),
+      sideMarginRatio: asDouble(json['sideMarginRatio'], 0.07),
+      titleSubtitleSpacingRatio: asDouble(json['titleSubtitleSpacingRatio'], 0.01),
+      sectionGapRatio: asDouble(json['sectionGapRatio'], 0.02),
+      screenshotCornerRadiusRatio: asDouble(json['screenshotCornerRadiusRatio'], 0.035),
+      screenshotShadowDyRatio: asDouble(json['screenshotShadowDyRatio'], 0.006),
+      screenshotShadowBlurRatio: asDouble(json['screenshotShadowBlurRatio'], 0.016),
+      screenshotBorderWidthRatio: asDouble(json['screenshotBorderWidthRatio'], 0.0015),
+      screenshotHeightMinRatio: asDouble(json['screenshotHeightMinRatio'], 0.42),
+      screenshotFitMode: parseEnumByName(
+        ScreenshotFitMode.values,
+        json['screenshotFitMode'],
+        ScreenshotFitMode.coverTopCenter,
+      ),
+      statusBarEnabled: asBool(json['statusBarEnabled'], false),
+      statusBarStyle: parseEnumByName(
+        CoverStatusBarStyle.values,
+        json['statusBarStyle'],
+        CoverStatusBarStyle.ios,
+      ),
+      statusBarBackgroundColor: Color(
+        asInt(json['statusBarBackgroundColor'], const Color(0xFF0E1228).toARGB32()),
+      ),
+      statusBarForegroundColor: Color(
+        asInt(json['statusBarForegroundColor'], Colors.white.toARGB32()),
+      ),
+      statusBarHeightRatio: asDouble(json['statusBarHeightRatio'], 0.06),
+      statusBarTimeText: asString(json['statusBarTimeText'], '9:41'),
+      screenshotTopOnlyRounded: asBool(json['screenshotTopOnlyRounded'], true),
+      deviceFrameEnabled: asBool(json['deviceFrameEnabled'], false),
+      deviceFrameColor: Color(
+        asInt(json['deviceFrameColor'], const Color(0xFF0B0C0F).toARGB32()),
+      ),
+      deviceFrameThicknessRatio: asDouble(json['deviceFrameThicknessRatio'], 0.026),
+      deviceScreenInsetXRatio: asDouble(json['deviceScreenInsetXRatio'], 1.0),
+      deviceScreenInsetYRatio: asDouble(json['deviceScreenInsetYRatio'], 1.0),
+      deviceIslandEnabled: asBool(json['deviceIslandEnabled'], false),
+      deviceIslandWidthRatio: asDouble(json['deviceIslandWidthRatio'], 0.28),
+      deviceIslandHeightRatio: asDouble(json['deviceIslandHeightRatio'], 0.065),
+      deviceIslandTopInsetRatio: asDouble(json['deviceIslandTopInsetRatio'], 0.02),
+      homeIndicatorEnabled: asBool(json['homeIndicatorEnabled'], false),
+      homeIndicatorWidthRatio: asDouble(json['homeIndicatorWidthRatio'], 0.24),
+      homeIndicatorHeightRatio: asDouble(json['homeIndicatorHeightRatio'], 0.012),
+      homeIndicatorBottomInsetRatio: asDouble(json['homeIndicatorBottomInsetRatio'], 0.02),
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

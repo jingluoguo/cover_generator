@@ -42,10 +42,9 @@ class CoverGeneratorController extends ChangeNotifier {
   // ─── Preset shortcuts ───
   List<CoverPreset> get presets => kCoverPresets;
 
-  CoverPreset? get currentPreset =>
-      selectedPresetIndex < presets.length
-          ? presets[selectedPresetIndex]
-          : null;
+  CoverPreset? get currentPreset => selectedPresetIndex < presets.length
+      ? presets[selectedPresetIndex]
+      : null;
 
   bool get isCustomSize => selectedPresetIndex >= presets.length;
 
@@ -57,26 +56,80 @@ class CoverGeneratorController extends ChangeNotifier {
 
   // ─── Mutations (call notifyListeners after) ───
 
-  void updateTitle(String v) { title = v; notifyListeners(); }
-  void updateSubtitle(String v) { subtitle = v; notifyListeners(); }
-  void updateFooterText(String v) { footerText = v; notifyListeners(); }
-  void updateLayout(CoverLayout v) { layout = v; notifyListeners(); }
+  void updateTitle(String v) {
+    title = v;
+    notifyListeners();
+  }
 
-  void updateStartColor(Color v) { startColor = v; notifyListeners(); }
-  void updateEndColor(Color v) { endColor = v; notifyListeners(); }
-  void updateFontFamily(String? v) { fontFamily = v; notifyListeners(); }
-  void updateFontPackage(String? v) { fontPackage = v; notifyListeners(); }
-  void updateTitleFontFamily(String? v) { titleFontFamily = v; notifyListeners(); }
-  void updateSubtitleFontFamily(String? v) { subtitleFontFamily = v; notifyListeners(); }
-  void updateFooterFontFamily(String? v) { footerFontFamily = v; notifyListeners(); }
+  void updateSubtitle(String v) {
+    subtitle = v;
+    notifyListeners();
+  }
+
+  void updateFooterText(String v) {
+    footerText = v;
+    notifyListeners();
+  }
+
+  void updateLayout(CoverLayout v) {
+    layout = v;
+    notifyListeners();
+  }
+
+  void updateStartColor(Color v) {
+    startColor = v;
+    notifyListeners();
+  }
+
+  void updateEndColor(Color v) {
+    endColor = v;
+    notifyListeners();
+  }
+
+  void updateFontFamily(String? v) {
+    fontFamily = v;
+    notifyListeners();
+  }
+
+  void updateFontPackage(String? v) {
+    fontPackage = v;
+    notifyListeners();
+  }
+
+  void updateTitleFontFamily(String? v) {
+    titleFontFamily = v;
+    notifyListeners();
+  }
+
+  void updateSubtitleFontFamily(String? v) {
+    subtitleFontFamily = v;
+    notifyListeners();
+  }
+
+  void updateFooterFontFamily(String? v) {
+    footerFontFamily = v;
+    notifyListeners();
+  }
+
   void updateAutoExtractBackgroundColor(bool v) {
     autoExtractBackgroundColor = v;
     notifyListeners();
   }
 
-  void selectPreset(int index) { selectedPresetIndex = index; notifyListeners(); }
-  void updateCustomWidth(double v) { customWidth = v; notifyListeners(); }
-  void updateCustomHeight(double v) { customHeight = v; notifyListeners(); }
+  void selectPreset(int index) {
+    selectedPresetIndex = index;
+    notifyListeners();
+  }
+
+  void updateCustomWidth(double v) {
+    customWidth = v;
+    notifyListeners();
+  }
+
+  void updateCustomHeight(double v) {
+    customHeight = v;
+    notifyListeners();
+  }
 
   void setScreenshot(ui.Image image, {String path = ''}) {
     screenshotImage?.dispose();
@@ -199,10 +252,9 @@ class CoverGeneratorController extends ChangeNotifier {
       '${tempDir.path}/cover_${DateTime.now().millisecondsSinceEpoch}.png',
     );
     await file.writeAsBytes(bytes);
-    await Share.shareXFiles(
-      [XFile(file.path, mimeType: 'image/png')],
-      text: title,
-    );
+    await Share.shareXFiles([
+      XFile(file.path, mimeType: 'image/png'),
+    ], text: title);
   }
 
   Future<bool> saveImage() async {
