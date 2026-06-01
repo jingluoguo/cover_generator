@@ -2,7 +2,7 @@ name: cover_generator
 description: >
   一个 Flutter 包，用于生成应用商店封面图（App Store、Play Store 等）。
   支持自定义标题、副标题、渐变色、截图嵌入，采用 Canvas 渲染引擎，输出高质量 PNG 图片。
-version: 1.0.0
+version: 1.0.1
 homepage: https://github.com/jingluoguo/cover_generator
 repository: https://github.com/jingluoguo/cover_generator
 issue_tracker: https://github.com/jingluoguo/cover_generator/issues
