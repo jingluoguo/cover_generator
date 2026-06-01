@@ -8,7 +8,7 @@
 
 - 🎨 **Canvas 渲染引擎** — 纯 `dart:ui` 绘制，确定性输出，无 widget 树依赖
 - 📸 **截图捕获** — `CoverCaptureWrapper` 包裹任意 widget，一键截图
-- 📐 **多尺寸预设** — iPhone 6.7"/6.5"/5.5"、iPad、Play Store、Android + 自定义尺寸
+- 📐 **多尺寸预设** — iPhone 6.5"、iPad 13"、华为 + 自定义尺寸
 - 🌈 **渐变色选择** — 10 种预设渐变 + HSV 调色盘自定义
 - ✏️ **文本自定义** — 标题、副标题、底部文字
 - 🔤 **字体可配置** — 支持统一字体与标题/副标题/footer 分别指定
@@ -119,12 +119,9 @@ final pngBytes = await CoverRenderer.render(config);
 
 | 预设        | 尺寸        | 用途                          |
 | ----------- | ----------- | ----------------------------- |
-| iPhone 6.7" | 1290 × 2796 | App Store · iPhone 15 Pro Max |
-| iPhone 6.5" | 1284 × 2778 | App Store · iPhone 11 Pro Max |
-| iPhone 5.5" | 1242 × 2208 | App Store · iPhone 8 Plus     |
-| iPad 12.9"  | 2048 × 2732 | App Store · iPad Pro          |
-| Play Store  | 1024 × 500  | Play Store · Feature Graphic  |
-| Android     | 1080 × 1920 | Play Store · Screenshot       |
+| iPhone 6.5" | 1242 × 2688 | App Store · iPhone 11 Pro Max |
+| iPad 13"    | 2064 × 2752 | App Store · iPad Pro 13"      |
+| 华为        | 450 × 800   | Android · Huawei              |
 | 自定义      | 任意        | 用户输入                      |
 
 ## 🏗️ 架构
