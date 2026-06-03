@@ -8,7 +8,10 @@ import '../models/cover_config.dart';
 
 /// Canvas-based renderer that produces promotional cover images.
 class CoverRenderer {
-  static const String _defaultFontFamily = 'HarmonyOS';
+  /// Default font family used when no custom font is specified.
+  /// `null` lets Flutter pick the platform default (e.g. Roboto on Android,
+  /// SF Pro on iOS). Override via [CoverConfig.fontFamily].
+  static const String? _defaultFontFamily = null;
 
   static Future<Uint8List> render(CoverConfig config) async {
     final w = config.width;

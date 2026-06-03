@@ -47,7 +47,8 @@ class _GeneratedResultPageState extends State<GeneratedResultPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('已保存到系统相册')));
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[cover_generator] Failed to save image to gallery: $e');
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,

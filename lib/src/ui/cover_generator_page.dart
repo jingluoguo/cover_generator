@@ -103,8 +103,8 @@ class _CoverGeneratorPageState extends State<CoverGeneratorPage> {
             layout: CoverLayout.fromJson(layoutJson),
           ),
         );
-      } catch (_) {
-        // Ignore broken saved data.
+      } catch (e) {
+        debugPrint('[cover_generator] Skipping broken saved layout: $e');
       }
     }
     if (!mounted) return;

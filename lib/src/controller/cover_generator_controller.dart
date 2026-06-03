@@ -204,8 +204,8 @@ class CoverGeneratorController extends ChangeNotifier {
       startColor = start;
       endColor = end;
       notifyListeners();
-    } catch (_) {
-      // Ignore extraction failures and keep current colors.
+    } catch (e) {
+      debugPrint('[cover_generator] Failed to extract colors from screenshot: $e');
     }
   }
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/cover_preset.dart';
 
 /// Horizontal chip list for selecting a size preset, with optional custom input.
-class SizeSelector extends StatelessWidget {
+class SizeSelector extends StatefulWidget {
   final List<CoverPreset> presets;
   final int selectedIndex;
   final ValueChanged<int> onSelect;
@@ -24,8 +24,53 @@ class SizeSelector extends StatelessWidget {
   });
 
   @override
+  State<SizeSelector> createState() => _SizeSelectorState();
+}
+
+class _SizeSelectorState extends State<SizeSelector> {
+  late final TextEditingController _widthController;
+  late final TextEditingController _heightController;
+
+  @override
+  void initState() {
+    super.initState();
+    _widthController = TextEditingController(
+      text: widget.customWidth?.toInt().toString() ?? '',
+    );
+    _heightController = TextEditingController(
+      text: widget.customHeight?.toInt().toString() ?? '',
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant SizeSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Sync controllers when the parent-provided values change externally
+    // (e.g. switching between saved configs) and the field is not focused.
+    if (widget.customWidth != oldWidget.customWidth) {
+      final newText = widget.customWidth?.toInt().toString() ?? '';
+      if (_widthController.text != newText) {
+        _widthController.text = newText;
+      }
+    }
+    if (widget.customHeight != oldWidget.customHeight) {
+      final newText = widget.customHeight?.toInt().toString() ?? '';
+      if (_heightController.text != newText) {
+        _heightController.text = newText;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _widthController.dispose();
+    _heightController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isCustom = selectedIndex >= presets.length;
+    final isCustom = widget.selectedIndex >= widget.presets.length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,11 +88,12 @@ class SizeSelector extends StatelessWidget {
           height: 36,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            itemCount: presets.length + 1, // +1 for "Custom"
+            itemCount: widget.presets.length + 1, // +1 for "Custom"
             separatorBuilder: (_, __) => const SizedBox(width: 8),
             itemBuilder: (_, i) {
-              final isSelected = selectedIndex == i;
-              final label = i < presets.length ? presets[i].label : '自定义';
+              final isSelected = widget.selectedIndex == i;
+              final label =
+                  i < widget.presets.length ? widget.presets[i].label : '自定义';
               return Theme(
                 data: Theme.of(context).copyWith(
                   chipTheme: ChipThemeData(
@@ -63,7 +109,7 @@ class SizeSelector extends StatelessWidget {
                 child: ChoiceChip(
                   label: Text(label),
                   selected: isSelected,
-                  onSelected: (_) => onSelect(i),
+                  onSelected: (_) => widget.onSelect(i),
                   labelStyle: TextStyle(
                     fontSize: 12,
                     color: isSelected ? Colors.white : Colors.black87,
@@ -84,12 +130,10 @@ class SizeSelector extends StatelessWidget {
                 child: TextField(
                   keyboardType: TextInputType.number,
                   decoration: _dimDecoration('宽'),
-                  controller: TextEditingController(
-                    text: customWidth?.toInt().toString() ?? '',
-                  ),
+                  controller: _widthController,
                   onChanged: (v) {
                     final d = double.tryParse(v);
-                    if (d != null) onCustomWidthChanged?.call(d);
+                    if (d != null) widget.onCustomWidthChanged?.call(d);
                   },
                 ),
               ),
@@ -101,12 +145,10 @@ class SizeSelector extends StatelessWidget {
                 child: TextField(
                   keyboardType: TextInputType.number,
                   decoration: _dimDecoration('高'),
-                  controller: TextEditingController(
-                    text: customHeight?.toInt().toString() ?? '',
-                  ),
+                  controller: _heightController,
                   onChanged: (v) {
                     final d = double.tryParse(v);
-                    if (d != null) onCustomHeightChanged?.call(d);
+                    if (d != null) widget.onCustomHeightChanged?.call(d);
                   },
                 ),
               ),
@@ -116,7 +158,7 @@ class SizeSelector extends StatelessWidget {
         if (!isCustom) ...[
           const SizedBox(height: 6),
           Text(
-            presets[selectedIndex].description,
+            widget.presets[widget.selectedIndex].description,
             style: TextStyle(
               fontSize: 11,
               color: Colors.grey.withValues(alpha: 0.7),
